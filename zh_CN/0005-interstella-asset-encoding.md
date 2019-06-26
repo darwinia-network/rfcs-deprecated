@@ -81,7 +81,10 @@ IOE Token ID编码的方式与传统的ERC721 Token ID编码兼容，也是uint2
 | 0              | NAN                                 |
 | 1              | Ethereum mainet                     |
 | 2              | TRON mainet                         |
-| 3              | EOS mainet                         |
+| 3              | EOS mainet                          |
+| 4              | PChain                              |
+| 5              | Ultrain                             |
+| 6              | HPB Chain                           |
 
 ## Contract ID
 
