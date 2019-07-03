@@ -59,13 +59,17 @@ RING的硬顶总量为100亿。
 
 锁定: 达尔文网络验证者Staking或者达尔文网络并行链Staking
 
+氪石的设计源于对权益工作量证明的一种新的理解，即基于你未来承诺持有RING多长时间来衡量你的工作量。
+
 ### 虚拟银行RING定存业务
-氪石利息的计算方式如下：
-假设每个RING锁定一年期(12个月)的氪石利息回报是X个氪石。(暂定X=0.0005)，C*X是每个RING年化氪石回报率参数(暂定为C = 0.2，每万份一年定期可以获得一个氪石，C后面可以由系统调节)，那么锁定N月，S个RING的氪石利息R计算方式为
+氪石利息的计算方式为按月复利，鼓励长期承诺投入。具体公式如下：
 
 ```
 R(N, X, S) = [(1 + C)^(N/12) - 1] * X * S    { N: from 1 to 36 }
 ```
+
+
+C*X是每个RING年化氪石回报率参数(暂定为C = 0.2，X = 5，每万份一年定期可以获得一个氪石，C后面可以由系统调节)，那么锁定N月，S个RING的氪石利息R计算方式为
 
 [![coffee-starcoin-Page-1](https://imgland.oss-cn-hangzhou.aliyuncs.com/photo/2018/a4204a47-8412-4d8e-9367-82a98cc8f3e4.jpg?x-oss-process=image/resize,w_640)](https://www.wolframalpha.com/input/?i=%5B1.2%5E(N%2F12)+-+1%5D+*+5+from+1+to+36)
 
