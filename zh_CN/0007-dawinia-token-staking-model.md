@@ -51,7 +51,7 @@ RING的硬顶总量为100亿。
 
 缩写Symbol: KTON
 
-精度: 18
+精度: 9
 
 发行: 通过定存操作发行
 
@@ -60,6 +60,18 @@ RING的硬顶总量为100亿。
 锁定: 达尔文网络验证者Staking或者达尔文网络并行链Staking
 
 氪石的设计源于对权益工作量证明的一种新的理解，即基于你未来承诺持有RING多长时间来衡量你的工作量。
+
+## RING和KTON的精度
+
+目前，RING和KTON的精度都为9，最小的单位为Nano-RING或Nano-KTON. 可以将 Nano-RING和Satoshi或者Wei相比较，而RING/KTON有点接近于bitcoin和 ether.
+
+| Unit      | Decimal Places     |
+| ----------| -------------------|
+| Nano      | 0                  |
+| Micro     | 3                  |
+| Milli     | 6                  |
+| RING/KTON | 9                  |
+
 
 ### 虚拟银行RING定存业务
 氪石利息的计算方式为按月复利，鼓励长期承诺投入。具体公式如下：
