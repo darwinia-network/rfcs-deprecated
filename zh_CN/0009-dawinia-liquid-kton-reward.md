@@ -65,7 +65,7 @@ to.Deposit = to.normal_deposit(Input) + to.Reward_Settlement(Input)
 
 ## 代码库
 
-https://github.com/darwinia-network/darwinia/tree/master/srml/token/kton
+https://github.com/darwinia-network/darwinia/tree/master/srml/kton
 
 ## 主要特性[WIP]
 

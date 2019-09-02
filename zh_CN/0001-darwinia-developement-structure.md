@@ -31,9 +31,11 @@
 
 关于Substrate框架的详细介绍，可以参考下面的一些代码库和文档。
 
-- [https://github.com/paritytech/substrate](Substrate)
-- [https://polkadot.js.org/](Polkadot和Substrate工具，接口和JS库).
-- [https://docs.substrate.dev/](Substrate文档和上手资料)
+- [Substrate](https://github.com/paritytech/substrate)
+- [Polkadot和Substrate工具，接口和JS库](https://polkadot.js.org)
+- [Substrate文档和上手资料](https://docs.substrate.dev)
+
+
 
 # 缺点
 [drawbacks]: #drawbacks
@@ -52,8 +54,9 @@
 
 达尔文网络将同时使用Substrate的SRML模块开发，以及合约模块的Parity ink合约开发(基于WebAssembly)
 
-- [https://github.com/paritytech/substrate-up] (构造开发SRML并且构造自己的链)
-- [https://github.com/paritytech/ink](ink! - Parity's ink to write smart contracts)
+- [构造开发SRML并且构造自己的链](https://github.com/paritytech/substrate-up)
+- [ink! - Parity's ink to write smart contracts](https://github.com/paritytech/ink)
+
 
 # 问题
 [unresolved-questions]: #unresolved-questions
