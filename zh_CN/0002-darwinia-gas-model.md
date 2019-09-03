@@ -60,8 +60,9 @@ KTON可以使用获得系统的收入分成，在第一个版本的以太坊大�
 
 在以太坊黄皮书以及Parity Substrate中已经有了一些经典设计和实现参考：
 
-- [https://ethereum.github.io/yellowpaper/paper.pdf] (以太坊黄皮书Section 5 and Appendix G)
-- [https://github.com/paritytech/substrate/blob/master/srml/contract/src/gas.rs](Gas Model of Substrate Contract SRML)
+- [以太坊黄皮书Section 5 and Appendix G](https://ethereum.github.io/yellowpaper/paper.pdf)
+- [Gas Model of Substrate Contract SRML](https://github.com/paritytech/substrate/blob/master/srml/contracts/src/gas.rs)
+
 
 # 问题
 [unresolved-questions]: #unresolved-questions
