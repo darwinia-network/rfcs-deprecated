@@ -1,8 +1,8 @@
-#通证解析系统(Token Resolution System)
+# 通证解析系统(Token Resolution System)
 
 
 
-##概述
+## 概述
 
 ### 假设和观点
 - Proof based token resolution system. (PTRS)
@@ -48,7 +48,7 @@
 
 
 
-##问题
+## 问题
 
 
 为了方便的标记一个物品或者一个资产，我们会用一个唯一的标识来标记它，不同的物品具有不同的标识。我们先拿物理空间里面的物品举例，在理想情况下，所有的物品都应该在同一个时空里面，这样大家都能观察的到，并且方便做区分和标识。但是现实情况是，不同的物品可能存在于不同的时空里面，并且观察者也不一定能看到每一个物品。同样的情况，在虚拟资产世界，因为存在不同的账本或称区块链网络(简称域)，不同的物品在同一个域里面因为有不同的标识，所以可以区分，但是该域里面的观察者无法识别来自外部域的物品标识。
@@ -67,37 +67,39 @@
 因此我们引入Token识别和解析系统来替代之前的方案，原先的编码方式，由[解析合约地址+Token_Index]代替。
 
 
-##技术方案
+## 技术方案
 
 
 通证解析协议是存在于中继链上的一种服务和协议，用于记录和解析当前通证在中继链范围内的全局状态，包括跨链历史，各个区块链网路对应的所有权合约地址，其他权利和信息。
 
-###通证解析结构
+### 通证解析结构
 
 ```angular2
 {
     "协议头": "Darwinia_Token_Resolution_System",
-    Token_Name: "",
-    Token_Type: "NFT",
-    "跨链信息": {
-        "权利": {
-            "所有权" : {
-                title: "<chain_id, ownership_contract>",
-                eth: "<eth, X>",
-                tron: "<tron, Y>",
-                eos: "<eos, Z>",
-                records: [
-                    ["guid0001", "1.X.eth", "2.Y.tron"],
-                    ["guid0002", "3.X.eth", "3.Y.tron"],
-                    ["guid0001", "2.Y.tron", "4.Z.eos"],
-                ]
+    Tokens: [
+        {
+            Token_Name: "Land",
+            Token_Type: "NFT",
+            "跨链信息": {
+                "权利": {
+                    "所有权" : {
+                        title: "<chain_id, ownership_contract>",
+                        eth: "<eth, X>",
+                        tron: "<tron, Y>",
+                        eos: "<eos, Z>",
+                        records: [
+                            ["guid0001", "1.X.eth", "2.Y.tron"],
+                            ["guid0002", "3.X.eth", "3.Y.tron"],
+                            ["guid0001", "2.Y.tron", "4.Z.eos"],
+                        ]
+                    },
+                    "使用权": {"..."}
+                }
             },
-            "使用权": {"..."}
+            "Linked_Data" : "<信息(类型，生产商)>"
         }
-    },
-
-    "其他跨链共享数据" : "<信息(类型，生产商)>"
-
+    ]
 }
 ```
 
@@ -111,18 +113,18 @@ WIP
 
 引入Token解析合约(脚本)来记录和更新Token的协议、跨链、权利和其他信息。
 
-####接入SPREE模块
+#### 接入SPREE模块
 通过在解析合约内定义约束条件，例如全局的通证总量，发行规则，并部署至SPREE模块，可以实现中继网络管辖范围的验证和可信互操作。
 
 
 更多关于SPREE模块的介绍，参考 https://wiki.polkadot.network/en/latest/polkadot/learn/spree
 [WIP]
 
-####基础设施支持
+#### 基础设施支持
 类似钱包和区块链浏览器这样的基础设施将可以很好的支持跨链通证，通过接入通证解析合约，可以很方便的定位和浏览该通证的全局信息，并进行相关操作。
 [WIP]
 
-####XClaim跨链转接桥的集成
+#### XClaim跨链转接桥的集成
 对于基于XClaim技术搭建的跨链转接桥，其Token的跨链是通过在对手链上构建超额抵押的对称CBA来实现的。虽然严格意义上讲，CBA不等同于原通证，但是从用户视角看其效果非常接近。
 
 对于这类跨链通证的支持仍有希望通过通证解析合约来描述和解析其跨链转接桥过程，只需跟中继链和平行链模式的跨链通证类型稍作区分，便可帮助开发者和用户理解其跨链通证(CBA)和原有通证的区别。
@@ -131,7 +133,7 @@ WIP
 推荐实现
 WIP
 
-###全局唯一标识
+### 全局唯一标识
 
 To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.
 
@@ -144,19 +146,19 @@ To harmonise existing practice in identifier assignment and resolution, to suppo
 对于同质Token来说，因为没有通证的索引，只有数量的概念，解析合约地址就是全局通证地址。
 
 
-###链上数据和链下数据
+### 链上数据和链下数据
 Token相关的数据分为链上和链下两种，其作用和价值不一样，链上数据可以很方便的用于智能合约和交易处理，而链下数据更多的用于描述，表达和引用资源文件。
 Onchain Linked Data
 [WIP]
 
-####Offchain Metadata and ontology tooling
+#### Offchain Metadata and ontology tooling
 [WIP]
 
-####Token Schema
+#### Token Schema
 To encourage the use of schema.org markup within token web resources to improve discoverability of information. [WIP]
 
 
-###适配器
+### 适配器
 
 对于那些使用已有区块链网路的通证标准实现的通证，可以通过在区块链网路内部实现一个适配器合约，以接入这套识别和解析系统，这个适配器可能是通证跨链转接桥的一个部分。
 
@@ -165,21 +167,21 @@ To encourage the use of schema.org markup within token web resources to improve 
 对于支持SPREE协议或跨链转接桥的区块链网路，将可以实现通证跨链可信转账和互操作。
 
 下面是一些常见通证标准的适配器参考实现：
-####以太坊ERC20适配器
+#### 以太坊ERC20适配器
 [WIP]
-####以太坊ERC721适配器
+#### 以太坊ERC721适配器
 [WIP]
-####以太坊ERC1155适配器
+#### 以太坊ERC1155适配器
 [WIP]
-####EOS dGoods适配器
+#### EOS dGoods适配器
 [WIP]
-####Cocos BCX NHAS-1808适配器
+#### Cocos BCX NHAS-1808适配器
 [WIP]
 
 
-###SDK和工具集
+### SDK和工具集
 
-####Token Service Framework
+#### Token Service Framework
 
 To identify valuable interoperability services within Polkadot and support their improvement. 
 
@@ -188,13 +190,13 @@ To identify existing services outside Polkadot and develop of strategic partners
 To identify the interoperability services that need to be developed.
 Workflow and Tool interoperability
 
-####Interoperability Knowledge Hub
+#### Interoperability Knowledge Hub
 
-####Implementation Studies
+#### Implementation Studies
 
 
 
-##参考
+## 参考
 
 https://eprint.iacr.org/2018/643.pdf
 
