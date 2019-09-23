@@ -1,8 +1,6 @@
+# Cross-chain Bridge Protocol			
 
-
-# NFT multi-chain operations protocol				
-
-###                                                                                                                                                        v 0.1.0
+###  v 0.1.0
 
 
 
