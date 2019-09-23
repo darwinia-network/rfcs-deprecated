@@ -277,7 +277,7 @@ Protocol Issue的反向操作。
 
 NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
 
-[WIP]
+[WIP](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0011-darwinia-cross-chain-nft-design-and-standards.md)
 
 
 

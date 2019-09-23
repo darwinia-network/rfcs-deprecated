@@ -2,7 +2,7 @@
 
 
 
-##I. Cross-chain NFT Design想要解决的问题
+## I. Cross-chain NFT Design想要解决的问题
 
 在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
 
@@ -14,7 +14,7 @@
 
 
 
-##II. UNFO Design
+## II. UNFO Design
 
 我们将UNFO设计成更加通用的UTXO，其结构如下：
 
