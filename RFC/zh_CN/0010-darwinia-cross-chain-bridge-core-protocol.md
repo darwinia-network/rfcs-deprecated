@@ -280,10 +280,6 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 (iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 记录 $GID$ 和 $nft_I^{x', n'}$的关系， 并将所有权交给 *requester* 在chain *I* 上的地址
 
-过程如下：
-
-![0010-multi-chain-relay-issue](./images/0010-multi-chain-relay-issue.jpg)
-
 #### Protocol: Transfer
 
 (i) ***转移***。*sender* 在 $I$ 上把 $nft_i^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
@@ -309,10 +305,6 @@ XClaim 给出了对 *chain relay* [7]的定义：
 以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
 
 (iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。 
-
-过程如下：
-
-![0010-multi-chain-relay-redeem](./images/0010-multi-chain-relay-redeem.jpg)
 
 
 
@@ -355,6 +347,18 @@ struct UNFO {
 ![0010-framework-of-bridge-core](./images/0010-framework-of-bridge-core.jpg)
 
 
+
+#### E-III. Protocols with UNFO
+
+##### Protocol: Issue
+
+![0010-multi-chain-relay-issue](./images/0010-multi-chain-relay-issue.jpg)
+
+
+
+##### Protocol: Redeem
+
+![0010-multi-chain-relay-redeem](./images/0010-multi-chain-relay-redeem.jpg)
 
 
 
