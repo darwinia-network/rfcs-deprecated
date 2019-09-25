@@ -1,3 +1,10 @@
+---
+rfc: 11
+title: 0011-darwinia-cross-chain-nft-design-and-standards
+status: Publish
+desc: Cross-chain NFT Design and Standards
+---
+
 # Cross-chain NFT Design and Standards
 
 

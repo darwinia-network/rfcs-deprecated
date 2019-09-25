@@ -1,0 +1,26 @@
+<style type="text/css">
+    .rfctable .title {
+        width: 67%;
+    }
+
+    .rfctable .author {
+        width: 33%;
+    }
+</style>
+{% assign rfcs = site.pages|where:"status","Publish" %}
+<table class="rfctable">
+    <thead>
+    <tr>
+        <th class="rfcnum">Number</th>
+        <th class="title">Title</th>
+        <th class="author">Desc</th>
+    </tr>
+    </thead>
+    {%- for page in rfcs -%}
+    <tr>
+        <td class="rfcnum"><a href="{{page.url|relative_url}}">{{page.rfc|xml_escape}}</a></td>
+        <td class="title">{{page.title|xml_escape}}</td>
+        <td class="desc">{{page.desc}}</td>
+    </tr>
+    {%- endfor -%}
+</table>
