@@ -28,4 +28,6 @@ First review [RFC-0001](https://github.com/darwinia-network/rfcs/blob/master/RFC
 The RFC source files are required to be in markdown format. [Typora](https://typora.io/) is a editor recommended for editing markdown files, it also have a good support for inline and Latex Formula. To view the Formulas in web browser, there is a chome [Mathjax Plugin](https://chrome.google.com/webstore/detail/mathjax-plugin-for-github/ioemnmodlmafdkllaclgeombjnmnbima) to help correctly render Latex Formulas in markdown documents in Github.
 
 ## Translation
-Go to https://gitlocalize.com/repo/3165/en/RFC/zh_CN
+If the status of the RFC are published or final, you can contribute by helping with the translation. This project use [Gitlocalize]()([https://gitlocalize.com](https://gitlocalize.com/)) to cope with translations.
+
+If you are ready, just go to https://gitlocalize.com/repo/3165/en/RFC/zh_CN .
