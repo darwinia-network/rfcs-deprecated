@@ -54,62 +54,14 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 - NFT的价值难以评估。在XClaim中，判断 $vault$ 的抵押是否足额/超额，是通过Oracle $O$ 实现的。这也存在一个潜在的假设：token $b$ 和 token $i$ 可以被正确地评估价值。基于目前繁荣的中心化和去中心化交易所，在提供了良好的流动性的情况下，是可以基本满足该潜在假设的。但是NFT交易所市场尚未成熟，即使中心化交易所也无法比较真实地反应市场对NFT的价格判断。NFT如何定价本身就是一个难题。
 - NFT定价不具有连续性和可预测性。即使某个NFT在市场上有了一次成交记录，即有了一个价格，因为NFT被售出的频次远低于FT，即使在市场流动性非常好的情况下，该NFT下一次的成交价格既不连续，也不可预测。
 
-### C. 研究基础
+### C. Solution Description
 
-如果以XClaim方案作为跨链的基本方案，那么在这个基础上，只需要解决NFT的定价问题，就可以解决系统的经济安全。
+在本文中介绍了两种NFT的跨链方案：
 
-对于NFT的定价问题，目前中心化和去中心化交易所给出的解决方案就是交给市场。根据dapp数据统计网站显示，排名第一的NFT交易所Opensea[8]一天的日活用户仅为42，日交易笔数73. 即使也采用和XClaim相同的喂价方案Oracle, 在这样的市场面前，得到的价格也很难具有代表性。
-
-并且，鉴于NFT的不可替代性，市场定价的方法也存在天然的悖论。即买卖成功才可以定价；但是买卖成功同时也意味着owner的转移。
-
-目前对于NFT的定价问题，还没有成型的方案。
+- 基于XClaim的NFT扩展
+- 基于Multi chain relays
 
 
-
-#### C-I. 什么是Harberger Taxes
-
-市场和私有财产是两个通常被放在一起谈论的话题，在现在社会很难想象，如果只单独谈论其中的一点却不提及另一点。然而在十九世纪，很多欧洲的经济学者也是自由论者和平等主张者，那时拥抱市场同时对私有财产持怀疑态度是很正常的事情。
-
-由此，实现一个包含市场但是却没有所有权的系统是完全可行的：在每年的结束，收集物品的价格，在第二年的一开始，物品属于出价更高的人。这样的系统虽然在现实中不可行，但是它有一个显著的优点：实现配置效率。每年，每件物品都属于可以从中获取最大价值的人（因此才愿意出更高的价格）。
-
-Eric Posner 和 Glen Weyl, 《radical market》的作者提出了一个方案Harberger Taxes[9]：1. 所有人都为自己的财产评估一个价格  2. 所有人按评估价的百分比，例如2%进行交税  3. 其他人可以以不小于评估价的价格，随时买走自己的财产。这就强制所有人都必须公平客观地评估物品的价格，评估地过高，自己就要多缴税；评估地过低，其他人就可以获得消费者剩余。
-
-
-
-#### C-II. Harberger Taxes在跨链中的应用
-
-我们提议将Harberger Taxes应用于NFT的定价上。不同于将定价问题交给时间和市场，我们提议将定价问题交给跨链发起者自己。
-
-因跨链并不需要涉及到NFT的交易，所以我们只应用Harberger Taxes的卖方估价并交税的部分，并不应用强制交易的部分。
-
-大概的思路为，由跨链发起者为其需要跨链的在chain $B$ 上的NFT $nft_b$ 声明一个价格 $p$ ，并按照一定比例的价格支付跨链手续费；对应地，$vault$ 需要按价格在chain $I$ 上提供等值/超值于$p$ 的抵押 $i$，如果跨链操作正确完成，则跨链手续费将被支付给对应的 $vault$ ；如果存在恶意行为导致跨链失败并且$nft_b$ 的归属者发生错误转移，则抵押的 $i$ 将用于补偿跨链发起者的损失。
-
-
-
-### D. 组件定义
-
-这里我们将部分遵从XClaim的声明方式，以保持延续性：
-
-- *Issuing blockchain*, the blockchain $I$, 跨链后的新NFT的发行链
-- *backing blockchain*, the blockchain $B$, 跨链前NFT所在的链
-- *NFT identifier*, $nft_b^{n}$， 表示在chain $B$ 上的原生的、标识为 $n$ 的NFT，出现在章节II中
-- *NFT identifier*, $nft_i^{n'}$， 表示跨链后在chain $I$ 上新增发的、 标识为 $n$ 的NFT，出现在章节II中
-- *NFT identifier*,  $nft_b^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT，出现在章节III中
-- *NFT identifier*,  $nft_i^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT，出现在章节III中
-- *native token on chain $I$*:  $i$
-- 抵押token，$i\_col$ , 表示在chain $I$ 上抵押的token
-
-系统参与方：
-
-- **Requester** :  在chain $B$ 上锁定 $nft_b^n$  并且希望在 $I$ 上获得新发行的$nft_i^{n'}$ ；
-- **Sender**： 在  $I$ 上拥有$nft_i^{n'}$ 并且可以转移它的所有权给其他人；
-- **Receiver**： 在 $I$ 接受并且获取 $nft_i^{n'}$ 的所有权的人；
-- **Redeemer**： 在 $I$ 上销毁 $nft_i^{n'}$ ，而后在 $B$ 上释放 $nft_b^n$；
-- **vault**： 不需要信任的第三方，保证 *Issue* 和 *Redeem* 时整个系统的经济安全；
-- **Issuing Smart Contract (iSC)**：在 $I$ 上完全公开的、负责管理$vault$ 名单并负责发行NFT资产$nft_i$ 的智能合约
-- **Locking Smart Contract(loSC)**: 在 $B$ 上完全公开的、负责管理冻结后的NFT资产 $nft_b$ 的智能合约 （出现在章节III）
-
-其中，*Requester, redeemer, vault* 必须在 *chain $I$ 和 chain $B$* 上都有对应的公私钥；*Sender, Receiver*只需要持有在 $I$ 上的公私钥；*iSC* 是在 $I$ 上完全公开的、可审计的智能合约；*loSC*是在 $B$ 上完全公开的、可审计的智能合约。
 
 ## II. XClaim-Based NFT cross-chain protocol
 
@@ -133,7 +85,64 @@ Alice 在 *chain $B$* 上拥有 $nft_b^n$,  Dave在chain $I$ 上有足够的 $i$
 
 为了实现以上场景，XClaim-based NFT cross-chain protocol需要实现三种协议：*Issue, Trasnfer, Redeem*. 为了简化模型，我们在此处省略手续费相关部分的细节。
 
-### B. 初步实现方案
+
+
+### B. 研究基础
+
+如果以XClaim方案作为跨链的基本方案，那么在这个基础上，只需要解决NFT的定价问题，就可以解决系统的经济安全。
+
+对于NFT的定价问题，目前中心化和去中心化交易所给出的解决方案就是交给市场。根据dapp数据统计网站显示，排名第一的NFT交易所Opensea[8]一天的日活用户仅为42，日交易笔数73. 即使也采用和XClaim相同的喂价方案Oracle, 在这样的市场面前，得到的价格也很难具有代表性。
+
+并且，鉴于NFT的不可替代性，市场定价的方法也存在天然的悖论。即买卖成功才可以定价；但是买卖成功同时也意味着owner的转移。
+
+目前对于NFT的定价问题，还没有成型的方案。
+
+
+
+#### B-I. 什么是Harberger Taxes
+
+市场和私有财产是两个通常被放在一起谈论的话题，在现在社会很难想象，如果只单独谈论其中的一点却不提及另一点。然而在十九世纪，很多欧洲的经济学者也是自由论者和平等主张者，那时拥抱市场同时对私有财产持怀疑态度是很正常的事情。
+
+由此，实现一个包含市场但是却没有所有权的系统是完全可行的：在每年的结束，收集物品的价格，在第二年的一开始，物品属于出价更高的人。这样的系统虽然在现实中不可行，但是它有一个显著的优点：实现配置效率。每年，每件物品都属于可以从中获取最大价值的人（因此才愿意出更高的价格）。
+
+Eric Posner 和 Glen Weyl, 《radical market》的作者提出了一个方案Harberger Taxes[9]：1. 所有人都为自己的财产评估一个价格  2. 所有人按评估价的百分比，例如2%进行交税  3. 其他人可以以不小于评估价的价格，随时买走自己的财产。这就强制所有人都必须公平客观地评估物品的价格，评估地过高，自己就要多缴税；评估地过低，其他人就可以获得消费者剩余。
+
+
+
+#### B-II. Harberger Taxes在跨链中的应用
+
+我们提议将Harberger Taxes应用于NFT的定价上。不同于将定价问题交给时间和市场，我们提议将定价问题交给跨链发起者自己。
+
+因跨链并不需要涉及到NFT的交易，所以我们只应用Harberger Taxes的卖方估价并交税的部分，并不应用强制交易的部分。
+
+大概的思路为，由跨链发起者为其需要跨链的在chain $B$ 上的NFT $nft_b$ 声明一个价格 $p$ ，并按照一定比例的价格支付跨链手续费；对应地，$vault$ 需要按价格在chain $I$ 上提供等值/超值于$p$ 的抵押 $i$，如果跨链操作正确完成，则跨链手续费将被支付给对应的 $vault$ ；如果存在恶意行为导致跨链失败并且$nft_b$ 的归属者发生错误转移，则抵押的 $i$ 将用于补偿跨链发起者的损失。
+
+
+
+### C. 组件定义
+
+这里我们将部分遵从XClaim的声明方式，以保持延续性：
+
+- *Issuing blockchain*, the blockchain $I$, 跨链后的新NFT的发行链
+- *backing blockchain*, the blockchain $B$, 跨链前NFT所在的链
+- *NFT identifier*, $nft_b^{n}$， 表示在chain $B$ 上的原生的、标识为 $n$ 的NFT，出现在章节II中
+- *NFT identifier*, $nft_i^{n'}$， 表示跨链后在chain $I$ 上新增发的、 标识为 $n$ 的NFT，出现在章节II中
+- *native token on chain $I$*:  $i$
+- 抵押token，$i\_col$ , 表示在chain $I$ 上抵押的token
+
+系统参与方：
+
+- **Requester** :  在chain $B$ 上锁定 $nft_b^n$  并且希望在 $I$ 上获得新发行的$nft_i^{n'}$ ；
+- **Sender**： 在  $I$ 上拥有$nft_i^{n'}$ 并且可以转移它的所有权给其他人；
+- **Receiver**： 在 $I$ 接受并且获取 $nft_i^{n'}$ 的所有权的人；
+- **Redeemer**： 在 $I$ 上销毁 $nft_i^{n'}$ ，而后在 $B$ 上释放 $nft_b^n$；
+- **vault**： 不需要信任的第三方，保证 *Issue* 和 *Redeem* 时整个系统的经济安全；
+- **Issuing Smart Contract (iSC)**：在 $I$ 上完全公开的、负责管理$vault$ 名单并负责发行NFT资产$nft_i$ 的智能合约
+- **backing Smart Contract(bSC)**: 在 $B$ 上完全公开的、负责管理冻结后的NFT资产 $nft_b$ 的智能合约 （出现在章节III）
+
+其中，*Requester, redeemer, vault* 必须在 *chain $I$ 和 chain $B$* 上都有对应的公私钥；*Sender, Receiver*只需要持有在 $I$ 上的公私钥；*iSC* 是在 $I$ 上完全公开的、可审计的智能合约；*bSC*是在 $B$ 上完全公开的、可审计的智能合约。
+
+### D. 初步实现方案
 
 #### Protocol: Issue
 
@@ -191,7 +200,7 @@ Alice 在 *chain $B$* 上拥有 $nft_b^n$,  Dave在chain $I$ 上有足够的 $i$
 
 所以我们引入了完全无 $vault$ 的跨链方案，通过引入技术安全性：
 
-- ***loSC + iSC***: 在章节II中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。在III-A中将详述对 chain $B$ 引入的新的假设约束。一旦 chain $B$ 上的资产安全可以非互操作性地实现，将降低对 $vault$ 的依赖。
+- ***bSC + iSC***: 在章节II中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。在III-A中将详述对 chain $B$ 引入的新的假设约束。一旦 chain $B$ 上的资产安全可以非互操作性地实现，将降低对 $vault$ 的依赖。
 
 - ***multi chain relay***: *chain relay* 可以提供区块链的区块和交易证明，它在XClaim扩展方案中，也被应用来减低对 $vault$ 的信任依赖。在章节III-B中，将介绍 *multi chain relay* 如何在保证安全的基础上，进一步地减少对 $vault$ 的依赖。
 
@@ -201,7 +210,7 @@ Alice 在 *chain $B$* 上拥有 $nft_b^n$,  Dave在chain $I$ 上有足够的 $i$
 
 - *backing blockchain* 和 *Issuing blockchain*:  都支持图灵完备的智能合约
 
-这样我们就可以通过在 $B$ 和 $I$ 上放置独立的智能合约 loSC 和 iSC 来提供更强的技术约束，保证跨链的安全性。
+这样我们就可以通过在 $B$ 和 $I$ 上放置独立的智能合约 bSC 和 iSC 来提供更强的技术约束，保证跨链的安全性。
 
 ### B. Chain Relay
 
@@ -228,60 +237,140 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 #### B-III. *multi chain relay* 架构
 
-在两条公链中跨链转移token，需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，成本将成指数级增长。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
+在两条公链中跨链转移token，s需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，成本将成指数级增长。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
 
 那么整个系统的架构如下：
 
-![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6gy1g74nx6orvxj30er0b9wf5.jpg)
+![chain-relay-framework](./images/0010-chain-relay-framework.jpg)
 
-图中 **Bridge Core** 即为基于Substrate 的 parachain；**iSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
-
-这里，SPV / light client 天然具备发送交易的功能，因此只要在 iSC 内部构造好对应公链的交易并签名，就可以原子地将交易广播到对应公链上。
+图中 **Bridge Core** 即为基于Substrate 的 parachain；**vSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
 
 
 
-#### B-IV. 组件定义
+### C. 组件定义
 
-- *Issuing Smart Contract*,  $iSC_X$:  表示在 chain $X$ 上的资产发行合约；
-  - $iSC_{BC}^X$, 特指在 *Bridge Core* 上验证 chain $X$ 上交易的资产发行合约/模块；
-- *Locking Smart Contract*,  $loSC_X$ : 表示在 chain $X$ 上的资产锁定合约；
-
+- *Issuing Smart Contract*,  $iSC_N$:  表示在 chain *N* 上的资产发行合约；
+- *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
+- *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
+- *NFT identifier*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
+  - *NFT identifier in Bridge Core*, $nft_{BC}^{B, n''}$ ，表示在Bridge Core，并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像
+- *NFT identifier*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
 - *NFT in Bridge Core*: $nft_{BC}^{X,n'}$ , 表示在 *bridge Core* 中，在 $iSC_{BC}^X$ 里、标识为n'的NFT资产；
-- *Issuing Transaction*: $T_I^{ISSUE}$, 在 chain $I$ 上发行NFT的交易数据构造； 
+- *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
+- *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
+- *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易 
+- *Extrinsic redeem*,  $EX_{redeem}$ , Bridge Core上的 redeem 的交易 
+- *Global NFT identifier*,  $GID$
 
 参与方：
 
-- *trigger*, 在 *Issue* 时提交lock交易给 *Bridge Core*, 并签名 $T_I^{ISSUE}$ 广播到 chain $I$；在 *Redeem*时反向操作。
-
-  > trigger 需要交纳一定金额作为保证金，如果在规定延迟∆内 没有提交正确的交易，则会被惩罚
-
 - *witness*,  维护 *chain relays* 的参与方；
 
-其他定义同章节I-D
+其他定义同章节II-C
 
-### C. 初步实现方案
+### D. 初步实现方案
 
 场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
 
 #### Protocol: Issue
 
-(i) ***锁定***。*requester* 将 chain $B$上的NFT资产 $nft_b^n$ 锁定在 $loSC_B$ 中，同时声明目的地公链 chain *I* 以及自己在chain $I$ 上的地址；
+(i) ***锁定***。*requester* 将 chain $B$上的NFT资产 $nft_B^{n,x}$ 锁定在 $bSC_B$ 中，同时声明目的地公链 chain *I* 以及自己在chain $I$ 上的地址；这一步将产生交易$T_B^{lock}$
 
-(ii) ***Bridge Core上发行***。 *requester* / *trigger* 将锁定交易发送给 $iSC_{BC}^B$ ,  $iSC_{BC}^B$ 会判断目的地公链，并把消息发送给对应的 $iSC_{BC}^I$ ,  并在$iSC_{BC}^I$ 发行 $nft_{BC}^{I,n'}$， 同时原子地构造 chain $I$ 上的资产发行交易: $build\_tx(nft\_id, address\_on\_I) -> T_I^{ISSUE}$，将该$T_I^{ISSUE}$ 添加进 pending池中；
+(ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
 
-(iii) ***发行***。在(ii) 中构造的 $T_I^{ISSUE}$ 将在构造完成之后，trigger从pending池中将其取出，并对其签名并广播到 chain $I$ 上执行 (签名本身也会产生交易T)， $iSC_I$将会验证签名交易T并按照 $T_I^{ISSUE}$增发对应的 $nft_i^{x',n'}$ 给 *requester* 在 chain $I$ 上的地址；
+- 产生新的$GID$ 并且触发相应目的地公链的 $vSC_I$ ,  
+- 在 $vSC_I$ 中记录 $GID$ 和 $nft_B^{x,n}$ 的对应关系，
+- 并触发$vSC_I$ 
+
+在 $vSC_I$ 中：
+
+-  发行 $nft_{BC}^{I,n''}$， 并且 $nft_{BC}^{I,n''}$: 的状态为 *lock*。 $issue\_ex(nft\_id\_on\_B,\ GID,\ address\_on\_I) \rightarrow EX_{issue}$
+
+(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 记录 $GID$ 和 $nft_I^{x', n'}$的关系， 并将所有权交给 *requester* 在chain *I* 上的地址
 
 #### Protocol: Transfer
 
 (i) ***转移***。*sender* 在 $I$ 上把 $nft_i^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
 
-(ii) ***见证***。当 $nft_i^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $loSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_i^{x',n'}$ 赎回时需要先将其锁定在 $loSC_I$ 中，此时 *loSC_I* 将不会允许该操作成功。
+(ii) ***见证***。当 $nft_i^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_i^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
 
 #### Protocol: Redeem
 
-Protocol Issue的反向操作。
+(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$redeem\_tx(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$ 
 
-### NFT Specific Design and Standards
+(ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
+
+- 记录 $GUID$ 和 $nft_I^{x', n'}$ 的对应关系，
+- 将$nft_BC_{I,n''}$ 的状态更改为 *unlock*，
+- 判断目的地公链并触发相应的 $vSC_B$ ,
+
+在 $vSC_B$ 中, 
+
+- 将 $nft_{BC}^{I,n''}$ 变为 $nft_{BC}^{B, n''}$ ，
+- 并且记录 $nft_{BC}^{B, n''}$  和 $GID$ 的对应关系，
+- 并且将 $nft_{BC}^{B, n''}$ 的状态更改为 $lock$
+
+以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
+
+(iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。 
+
+
+
+### E. NFT 转换在 Bridge Core内的实现
+
+在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n''}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
+
+在 Bridge Core 内这些 中间态的NFT被标记为 UNFO (Unspent Non-Fungible Output). 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
+
+
+
+#### E-I. UNFO 结构
+
+UNFO的结构：
+
+```rust
+struct UNFO {
+  pub local_id, // chain_id + smart_cotnract_id + token_id
+  pub global_id,
+  pub lock_script, // e.g. to check if it is locked or unlocked
+}
+```
+
+当一个UNFO产生时，一定要满足：
+
+- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
+- 另一个UNFO被销毁
+  -  条件：销毁和产生的UNFO的GID必须相同
+
+![0010-UNFO-transform](./images/0010-UNFO-transform.jpg)
+
+
+
+
+
+#### E-II. Bridge Core 内部结构
+
+
+
+![0010-framework-of-bridge-core](./images/0010-framework-of-bridge-core.jpg)
+
+
+
+#### E-III. Protocols with UNFO
+
+##### Protocol: Issue
+
+![0010-multi-chain-relay-issue](./images/0010-multi-chain-relay-issue.jpg)
+
+
+
+##### Protocol: Redeem
+
+![0010-multi-chain-relay-redeem](./images/0010-multi-chain-relay-redeem.jpg)
+
+
+
+### F. Open Concern: NFT Specific Design and Standards
 
 NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
 
