@@ -1,12 +1,12 @@
 ---
 rfc: 10
-title: 0010-darwinia-cross-chain-bridge-core-protocol
-status: Publish
+title: 0010-darwinia-cross-chain-nft-bridge-protocol
+status: Draft
 desc: Cross-chain Bridge Protocol
 ---
 
 
-# Cross-chain Bridge Protocol			
+# Cross-chain NFT Bridge Protocol			
 
 ###  v 0.1.0
 

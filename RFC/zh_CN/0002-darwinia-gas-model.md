@@ -1,7 +1,7 @@
 ---
 rfc: 2
 title: 0002-darwinia-gas-model
-status: Publish
+status: Draft
 desc: 达尔文网络的燃料费模型
 ---
 

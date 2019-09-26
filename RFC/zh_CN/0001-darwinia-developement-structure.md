@@ -1,7 +1,7 @@
 ---
 rfc: 1
 title: 0001-darwinia-development-structure
-status: Publish
+status: Draft
 desc: 达尔文网络的开发架构描述
 ---
 

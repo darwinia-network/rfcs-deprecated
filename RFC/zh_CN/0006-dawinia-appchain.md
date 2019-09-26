@@ -1,7 +1,7 @@
 ---
 rfc: 6
 title: 0006-dawinia-appchain
-status: Publish
+status: Draft
 desc: 达尔文应用链(Darwinia AppChain)
 ---
 
