@@ -7,6 +7,9 @@ desc: XClaim Based NFT Solution Using Harberger Tax
 
 # XClaim Based NFT Solution Using Harberger Tax
 
+## 概述
+针对XClaim框架中缺少针对NFT的喂价机制设计，本文提出通过哈伯格税模型的机制来解决价格发现问题。
+
 ## I. XClaim-Based NFT cross-chain protocol
 
 ### A. 区块链模型假设

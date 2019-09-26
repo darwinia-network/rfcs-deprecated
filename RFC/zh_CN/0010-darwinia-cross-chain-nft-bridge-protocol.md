@@ -132,8 +132,6 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 - *witness*,  维护 *chain relays* 的参与方；
 
-其他定义同章节II-C
-
 ### D. 初步实现方案
 
 场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
@@ -388,7 +386,7 @@ To harmonise existing practice in identifier assignment and resolution, to suppo
 
 [8] https://opensea.io/
 
-[9] https://vitalik.ca/general/2018/04/20/radical_markets.html?source=post_page-----c2c99e866f87----------------------
+[9] https://vitalik.ca/general/2018/04/20/radical_markets.html
 
 [10] https://github.com/ethereum/wiki/wiki/Light-client-protocol
 
