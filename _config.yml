@@ -43,4 +43,3 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - .idea
-  - README.md
