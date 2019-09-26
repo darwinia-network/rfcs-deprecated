@@ -1,3 +1,11 @@
+---
+rfc: 2
+title: 0002-darwinia-gas-model
+status: Publish
+desc: 达尔文网络的燃料费模型
+---
+
+
 - 功能描述: 达尔文网络的燃料费模型
 - 开始时间: 2019-04-28
 - RFC PR: None

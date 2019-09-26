@@ -1,3 +1,10 @@
+---
+rfc: 9
+title: 0009-dawinia-liquid-kton-reward
+status: Publish
+desc: 给流动KTON分发RING收益
+---
+
 - 功能描述: 给流动KTON分发RING收益
 - 开始时间: 2019-05-13
 - RFC PR: None

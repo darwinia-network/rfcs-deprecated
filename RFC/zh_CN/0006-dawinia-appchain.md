@@ -1,3 +1,10 @@
+---
+rfc: 6
+title: 0006-dawinia-appchain
+status: Publish
+desc: 达尔文应用链(Darwinia AppChain)
+---
+
 - 功能描述: 达尔文应用链(Darwinia AppChain)
 - 开始时间: 2019-05-13
 - RFC PR: None

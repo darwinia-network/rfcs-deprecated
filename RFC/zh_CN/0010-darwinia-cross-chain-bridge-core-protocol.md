@@ -1,3 +1,11 @@
+---
+rfc: 10
+title: 0010-darwinia-cross-chain-bridge-core-protocol
+status: Publish
+desc: Cross-chain Bridge Protocol
+---
+
+
 # Cross-chain Bridge Protocol			
 
 ###  v 0.1.0
