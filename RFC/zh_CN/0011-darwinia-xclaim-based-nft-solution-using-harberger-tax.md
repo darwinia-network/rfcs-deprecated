@@ -2,7 +2,7 @@
 rfc: 11
 title: 0011-darwinia-xclaim-based-nft-solution-using-harberger-tax
 status: Draft
-desc: Cross-chain NFT Design and Standards
+desc: XClaim Based NFT Solution Using Harberger Tax
 ---
 
 # XClaim Based NFT Solution Using Harberger Tax
