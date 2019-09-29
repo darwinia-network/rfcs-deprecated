@@ -107,7 +107,7 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 那么整个系统的架构如下：
 
-![chain-relay-framework](./images/0010-chain-relay-framework.jpg)
+![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
 
 图中 **Bridge Core** 即为基于Substrate 的 parachain；**vSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
 
@@ -119,9 +119,9 @@ XClaim 给出了对 *chain relay* [7]的定义：
 - *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
 - *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
 - *NFT identifier*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
-  - *NFT identifier in Bridge Core*, $nft_{BC}^{B, n''}$ ，表示在Bridge Core，并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像
+  - *NFT identifier in Bridge Core*, $nft_{BC}^{B, n}$ ，表示在Bridge Core，并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像
 - *NFT identifier*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
-- *NFT in Bridge Core*: $nft_{BC}^{X,n'}$ , 表示在 *bridge Core* 中，在 $iSC_{BC}^X$ 里、标识为n'的NFT资产；
+  - *NFT identifier in Bridge Core*, $nft_{BC}^{I, n'}$ ，表示在Bridge Core，并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像
 - *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
 - *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
 - *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易 
@@ -130,7 +130,7 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 参与方：
 
-- *witness*,  维护 *chain relays* 的参与方；
+- *witness*,  维护 Bridge Core 的参与方；
 
 ### D. 初步实现方案
 
@@ -142,37 +142,33 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 (ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
 
-- 产生新的$GID$ 并且触发相应目的地公链的 $vSC_I$ ,  
-- 在 $vSC_I$ 中记录 $GID$ 和 $nft_B^{x,n}$ 的对应关系，
+- 产生新的$GID$ 和 $nft_{BC}^{B,n}$ , 记录 $GID$ 和 $nft_{BC}^{B,n}$ 二者之间的关系，
 - 并触发$vSC_I$ 
 
 在 $vSC_I$ 中：
 
--  发行 $nft_{BC}^{I,n''}$， 并且 $nft_{BC}^{I,n''}$: 的状态为 *lock*。 $issue\_ex(nft\_id\_on\_B,\ GID,\ address\_on\_I) \rightarrow EX_{issue}$
+-  销毁  $nft_{BC}^{B,n}$，发行 $nft_{BC}^{I,?}$， $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{issue}$
 
-(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 记录 $GID$ 和 $nft_I^{x', n'}$的关系， 并将所有权交给 *requester* 在chain *I* 上的地址
+(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 并记录 $GID$ 和 $nft_I^{x', n'}$的关系， 且将所有权交给 *requester* 在chain *I* 上的地址
 
 #### Protocol: Transfer
 
-(i) ***转移***。*sender* 在 $I$ 上把 $nft_i^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
+(i) ***转移***。*sender* 在 $I$ 上把 $nft_I^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
 
-(ii) ***见证***。当 $nft_i^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_i^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
+(ii) ***见证***。当 $nft_I^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_I^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
 
 #### Protocol: Redeem
 
-(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$redeem\_tx(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$ 
+(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$lock\_I(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$ 
 
 (ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
 
 - 记录 $GUID$ 和 $nft_I^{x', n'}$ 的对应关系，
-- 将$nft_BC_{I,n''}$ 的状态更改为 *unlock*，
 - 判断目的地公链并触发相应的 $vSC_B$ ,
 
 在 $vSC_B$ 中, 
 
-- 将 $nft_{BC}^{I,n''}$ 变为 $nft_{BC}^{B, n''}$ ，
-- 并且记录 $nft_{BC}^{B, n''}$  和 $GID$ 的对应关系，
-- 并且将 $nft_{BC}^{B, n''}$ 的状态更改为 $lock$
+- 通过 $GID$检索，销毁 $nft_{BC}^{I,n'}$ ，产生 $nft_{BC}^{B, n}$ ，$ redeem\_ex(\ GID,\ nft\_id\_on\_B,\ address\_on\_I) \rightarrow EX_{issue}$
 
 以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
 
@@ -180,15 +176,67 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 
 
-### E. NFT 转换在 Bridge Core内的实现
+### F. Implementation
 
-在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n''}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
+#### E-I. Specification
+
+##### Protocol: Issue
+
+![image-20190927184316820](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8t97jjj318k0jidig.jpg)
+
+解释：
+
+###### *requester* 相关的操作：
+
+- **lockB**($nft_B^{x,n}$, cond):   发生在chain $B$ 内。将$nft_B^{x,n}$ 锁定在 $bSC_B$ 中，并声明 *requester* 在 chain $I$ 上的地址，这个操作对应交易 $T_B^{lock}$
+
+- **verifyBOp**(lockB, $T_B^{lock}$, $\Delta_{lock}$) $\rightarrow T$ :    发生在Bridge Core内。*requester*将 $T_B^{lock}$ 提交至 Bridge Core中的 $vSC_B$ 进行验证，如果 $T_B^{lock}$ 真实地在 chain $B$ 上发生过并且满足最小需要延时 $\Delta_{lock}$，即返回结果T(True)，否则返回F(False).  
+
+  如果结果为T，则在 $vSC_B$ 中自动触发 newGid($nft_B^{x,n}$)，会产生新的GID，以及 $nft_B^{x,n}$ 在 Bridge Core内的镜像 $nft_{BC}^{B,n}$ 
+
+- **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ :  发生在 chain $I$ 内。*requester* 将 $EX_{issue}$ 提交至chain $I$ 的 $iSC_I$ 内，如果$iSC_I$ 验证 $EX_{issue}$ 的真实性即返回T，否则返回F。验证通过后，即通过调用issue方法，发行 $nft_I^{x',n'}$ 到 *requester* 在 chain $I$ 的地址上。
+
+###### *witness* 相关操作：
+
+- **trigger**($vSC_I,\ pk_I^{requester},\ GID$ ): *witness* 触发 $vSC_I$ 中的方法， 将 $nft_{BC}^{B,n}$ 销毁并产生 $nft_{BC}^{I,?}$, 表示在chain $I$ 上即将新增发的nft的镜像（这里之所以用$?$ 因为此时chain $I$ 上的nft还未被增发，因此无法获取其token id）。这次操作将产生 $EX_{issue}$.
+
+
+
+##### Protocol: Transfer
+
+![image-20190927191635665](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8pswk9j3120050aac.jpg)
+
+解释：
+
+在 chain $I$ 上 *sender* 调用 $iSC_I$ 中的 transfer方法，将 $nft_I^{x',n'}$ 发送给 *receiver*
+
+
+
+##### Protocol: Redeem
+
+![image-20190927192023177](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8s2dq8j30ze0hqmzn.jpg)
+
+解释：
+
+###### *redeemer* 相关操作：
+
+- **lockI**( $nft_I^{x',n'}$, $GID$, $pk_B^{redeemer}$ ) : 发生在 chain $I$ 上。 *redeemer* 将 $nft_I^{x',n'}$ 锁定在 $bSC_I$ 中，$bSC_I$ 可以原子地检验 $GID$ 和 $nft_I^{x',n'}$ 对应关系。该操作将会产生交易 $T_I^{redeemer}$
+- **verifyIOp**(lockI, $T_I^{redeemer}$, $\Delta_{redeem}$) : 发生在 Bridge Core内。用户将 $T_I^{redeem}$ 提交至 $vSC_I$ 中，如果 $T_I^{redeem}$ 真实地在 chain $I$ 上发生过并且满足最小需要延时 $\Delta_{redeem}$，即会根据 $GID$ 找到 对应的 $nft_{BC}^{I,?}$ 并根据自动补全成 $nft_{BC}^{I,n'}$ 
+- **verifyBCOp**(trigger, $EX_{redeem}$, $\Delta_{trigger}$) $\rightarrow T$ :  发生在 chain $B$ 内。*redeemer* 将 $EX_{redeem}$ 提交至chain $B$ 的 $iSC_B$ 内，如果$iSC_B$ 验证 $EX_{redeem}$ 的真实性即返回T，否则返回F。验证通过后，即通过调用issue方法，即释放 $nft_B^{x,n}$ 到 *redeemer* 在 chain $B$ 的地址上。
+
+###### *witness* 相关操作：
+
+- **trigger**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *witness* 触发 $vSC_B$ 中的方法， 将 $nft_{BC}^{I,n'}$ 转换成 $nft_{BC}^{B,n}$, 表示在chain $B$ 上即将释放的nft的镜像。这次操作将产生 $EX_{redeem}$.
+
+
+
+#### E-II. UNFO 
+
+在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
 
 在 Bridge Core 内这些 中间态的NFT被标记为 UNFO (Unspent Non-Fungible Output). 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
 
 
-
-#### E-I. UNFO 结构
 
 UNFO的结构：
 
@@ -206,7 +254,7 @@ struct UNFO {
 - 另一个UNFO被销毁
   -  条件：销毁和产生的UNFO的GID必须相同
 
-![0010-UNFO-transform](./images/0010-UNFO-transform.jpg)
+![0010-UNFO-transform](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg)
 
 
 
@@ -216,7 +264,7 @@ struct UNFO {
 
 
 
-![0010-framework-of-bridge-core](./images/0010-framework-of-bridge-core.jpg)
+![0010-framework-of-bridge-core](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg)
 
 
 
@@ -224,13 +272,13 @@ struct UNFO {
 
 ##### Protocol: Issue
 
-![0010-multi-chain-relay-issue](./images/0010-multi-chain-relay-issue.jpg)
+![0010-multi-chain-relay-issue](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8q3raej30pz0eljsj.jpg)
 
 
 
 ##### Protocol: Redeem
 
-![0010-multi-chain-relay-redeem](./images/0010-multi-chain-relay-redeem.jpg)
+![0010-multi-chain-relay-redeem](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8r31plj30r70elabi.jpg)
 
 ### F. Open Concern: NFT Specific Design and Standards
 
@@ -259,8 +307,7 @@ NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚�
 pub struct UNFO {
     pub type: chainId,
     pub value: Vec<u8>, // token id on chainId
-    pub lock: Script, // owner address
-    pub cond_script: Option<Script>,
+    pub lock: Script, // condition
 }
 ```
 
