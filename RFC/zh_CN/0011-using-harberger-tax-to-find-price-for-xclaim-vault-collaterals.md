@@ -1,11 +1,11 @@
 ---
 rfc: 11
-title: 0011-darwinia-xclaim-based-nft-solution-using-harberger-tax
+title: 0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals
 status: Draft
 desc: XClaim Based NFT Solution Using Harberger Tax
 ---
 
-# XClaim Based NFT Solution Using Harberger Tax
+# Using Harberger Tax to find price for XClaim Vault Collaterals
 
 ## 概述
 针对XClaim框架中缺少针对NFT的喂价机制设计，本文提出通过哈伯格税模型的机制来解决价格发现问题。

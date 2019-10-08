@@ -8,23 +8,19 @@ desc: Cross-chain NFT Bridge Protocol
 
 # Cross-chain NFT Bridge Protocol			
 
-###  v 0.2.0
+###  v 0.2.2
 
 
 
-## 0. 概述
+## I. 概述
 
-对于不同区块链上的token交换，目前虽然中心化交易所可以帮助执行，但是这样的服务需要高度的信任，且易发生主动作恶、单点故障等问题。随着Cosmos、Polkadot这样一批优秀的跨链项目的落地，架构在跨链基础设施之上的去中心化token流通协议/方案也成为重要的研究内容。
-
-在已有的方案中，atomic cross-chain swaps (ACCS) 是最早提出的可行性方案，但由于其跨链效率低、成本高，实际使用场景并不多。随后，XClaim (Cross Claim) 针对 ACCS 的缺点，提出了通用的、高效低成本的跨链框架，使用了Cryptocurrency-Bakced Assets (CBAs). 
-
-XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身的局限性：只针对Fungible Token有效，并且。目前针对NFT的跨链流通还没有通用框架。本文提出了基于XClaim的适用NFT跨链的扩展协议（以双链互跨为例），并且在多链互跨的情况下，提出了更低成本、功能根据扩展性的跨链协议。
+基于XClaim的框架给通证跨链提供了一个思路，但是对于NFT仍有很多问题，其中主要包括Backing Blockchain上 Vault抵押物设计的问题。通过在Backing Blockchain上引入chain-Relay合约可以有效的解决这个问题，本文将基于这个改进的跨链转接桥方案，设计跨链NFT的方案和标准。
 
 **关键词**：Blockchain, NFT, cross chain, multi-chain
 
 
 
-## I. 背景
+## II. 背景
 
 ### A. 研究历史
 
@@ -54,56 +50,15 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 ### C. Solution Description
 
-解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011](./0011-darwinia-xclaim-based-nft-solution-using-harberger-tax.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
+解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
 
-另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得质押成本降低，简称为 *Non-vault* NFT multi-chain operations protocol.
+另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得质押成本降低，简称为[RFC-0012: XClaim using two chainRelay model](./0012-xclaim-using-two-chainrelay-model.md)，详细的介绍将不在本文进行详细介绍，本文将着重基于这个改进的跨链转接桥方案，设计一个跨链的NFT标准，并且在多链互跨的情况下，提出了更低成本、功能具备扩展性的跨链协议。
 
+## II. Bridge Core - Chain Relay Hub
 
+在两条公链中跨链转移token，需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，总共将需要$C_n^2$个chain relay合约。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
 
-## II. *Non-vault* NFT multi-chain operations protocol
-
-本章节将展示NFT multi-chain operations protocol的设计思路和过程实现。在章节II中，XClaimed-based跨链方案已经可以保证了在大部分场合下的NFT的跨链安全操作，但是依然无法保证当NFT价格产生剧烈波动时，整个系统的鲁棒性和可持续性。
-
-所以我们引入了完全无 $vault$ 的跨链方案，通过引入技术安全性：
-
-- ***bSC + iSC***: 在XClaim的方案中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。在II-A中将详述对 chain $B$ 引入的新的假设约束。一旦 chain $B$ 上的资产安全可以非互操作性地实现，将降低对 $vault$ 的依赖。
-
-- ***multi chain relay***: *chainRelay* 可以提供区块链的区块和交易证明，它在XClaim扩展方案中，也被应用来减低对 $vault$ 的信任依赖。在章节II-B中，将介绍 *multi chain relay* 如何在保证安全的基础上，进一步地减少对 $vault$ 的依赖。
-
-### A. 区块链模型假设
-
-在目前已经上线的区块链项目中，几乎没有NFT作为链的原生资产的，所有的NFT几乎都是在智能合约内实现的。因此，对原生资产所在的chain $B$, 可以引入全新且合理的假设：
-
-- *Backing blockchain* 和 *Issuing blockchain*:  都支持图灵完备的智能合约
-
-这样我们就可以通过在 $B$ 和 $I$ 上放置独立的智能合约 bSC 和 iSC 来提供更强的技术约束，保证跨链的安全性。
-
-### B. Chain Relay
-
-#### B-I. 什么是 *chain relay*
-
-XClaim 给出了对 *chain relay* [7]的定义：
-
-> Chain relays: Cross-Chain State Verification. It is capable of interpreting the statte of the backing blockchain B and provide functionality comparable to an SPV or light client[10].
-
-因此，*chain relay* 可以被认为是由包含root of merkle tree的区块头组成。它为 iSC 提供了两种功能： *交易存在证明* 以及 *共识证明*。
-
-- ***交易存在证明***： *chain relay* 存储着区块链的每一个区块头，以及区块头里的root of merkle tree. 在提供merkle tree路径的情况下，这已经足够可以证明一笔交易是否存在于这条链的某个区块中。
-- ***共识证明***： 以比特币为例，因为每个节点通常不能即时看到全网的情况，因此经常会发生产生孤块，又在重组中被丢弃的情况。为了避免这种情况带来的攻击/漏洞，*chain relay* 必须要验证给定的区块头是否为完整区块链的一部分，例如被大部分节点认可。对于共识为Proof-of-Work的区块链，*chain relay* 必须：(i) 知道挖矿难度调整策略  (ii) 验证收到的区块头是否在具有最多累计工作量证明的链上。 对于共识为Proof-of-Stake的区块链，*chain relay* 必须：(i) 知道协议要求/staking的阶段，例如epoch  (ii) 验证区块头中验证人签名数量是否满足区块的阈值要求。 
-
-![image-20190918192745871](https://tva1.sinaimg.cn/large/006y8mN6gy1g74nx67ss8j30m60gc76z.jpg)
-
-​																						（图片来自XClaim，待更新 ）
-
-#### B-II.  *chain relay* 如何去信任
-
-这里以章节II中的 *Protocol Issue* 为例，当 *requester* 把 $nft_b^n$ 锁定在 $vault$ 时，会产生一笔交易: $lock(vault_address, lock_amount) -> T_l$ ，随后 *requester* 会向 *chain relay* 提交这笔交易$T_l$ ，之后 *chain relay* 会检验 $T_l$ 确实是存在于给定区块的交易中，这个区块也存在于最长链中，那么就证明token已经被安全地锁定了。如果验证通过，会原子地触发 iSC 中的资产发行操作。
-
-
-
-#### B-III. *multi chain relay* 架构
-
-在两条公链中跨链转移token，s需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，成本将成指数级增长。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
+#### B. *Chain Relay Hub* 架构
 
 那么整个系统的架构如下：
 
@@ -176,7 +131,7 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 
 
-### F. Implementation
+### E. Implementation
 
 #### E-I. Specification
 
@@ -230,7 +185,7 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 
 
-#### E-II. Cross-chain NFT Standards
+## IV. Cross-chain NFT Standards
 
 为了方便的标记一个物品或者一个资产，我们会用一个唯一的标识来标记它，不同的物品具有不同的标识。我们先拿物理空间里面的物品举例，在理想情况下，所有的物品都应该在同一个时空里面，这样大家都能观察的到，并且方便做区分和标识。但是现实情况是，不同的物品可能存在于不同的时空里面，并且观察者也不一定能看到每一个物品。同样的情况，在虚拟资产世界，因为存在不同的账本或称区块链网络(简称域)，不同的物品在同一个域里面因为有不同的标识，可以容易的区分和定位，但是该域里面的观察者无法识别和解析来自外部域的物品标识。
 
@@ -270,11 +225,11 @@ struct UNFO {
 
 
 
-- 全局唯一标识
+### A. 全局唯一标识
 
 为了将不同标准的通证标识符进行规范化，以提供识别和解析方法，与现有的标准进行很好的协调和对接，并满足社区基础设施建设的标准需求。（To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.) 跨链系统将为每一个跨链后的通证分配一个全局ID(global_id)，
 
-- 本地通证解析方式
+### B. 本地通证解析方式
 
 通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和证明服务。
 
@@ -308,7 +263,7 @@ struct UNFO {
 
 
 
-#### E-III. Bridge Core 内部结构
+### C. Bridge Core 内部结构
 
 
 
@@ -316,7 +271,7 @@ struct UNFO {
 
 
 
-#### E-IV. Protocols with UNFO
+### D. Protocols with UNFO
 
 ##### Protocol: Issue
 
