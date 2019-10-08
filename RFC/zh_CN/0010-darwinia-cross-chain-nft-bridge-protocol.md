@@ -40,9 +40,9 @@ XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身�
 
 为了实现去信任的、低成本的、高效率的token跨链操作，XClaim团队提出了cross claim方案，基于CBA。并且在XClaim的论文中详述了XClaim是如何完成以下四种操作的：Issue, Transfer, Swap and Redeem.
 
- XClaim系统中保证经济安全的角色被称为 $vault$,  如果任何人想要把chain $B$ 上的原生token $b$ 跨到 chain $I$ 变成 $i(b)$ ，那么就需要 $vault$ 在chain $I$ 上超额抵押 $i$ 。 在以上四种操作中，如果 $vault$ 存在恶意行为，则罚掉 $vault$ 抵押的 $i$ ，用于补偿跨链发起者。其他细节详见XClaim的论文[7]。
+ XClaim系统中保证经济安全的角色被称为 $vault$,  如果任何人想要把chain $B$ 上的原生token $b$ 跨到 chain $I$ 变成 $i(b)$ ，那么就需要 $vault$ 在chain $I$ 上超额抵押 $i$ 。 在赎回操作中，如果 $vault$ 存在恶意行为，则罚掉 $vault$ 抵押的 $i$ ，用于赎回操作发起者。其他细节详见XClaim的论文[7]。
 
-至此，对于Fungible token的跨链，已经得到一个可靠的、可实现的方案。
+至此，对于流动性较好的Fungible token的跨链，已经得到一个可靠的、可实现的方案。
 
 ### B. 尚未解决的问题
 
@@ -56,7 +56,7 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011](./0011-darwinia-xclaim-based-nft-solution-using-harberger-tax.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
 
-另一个思路是通过在Backing Blockchain映入chainRelay的方案，对背书的资产做更多的保护，使得质押成本降低，简称为 *Non-vault* NFT multi-chain operations protocol.
+另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得质押成本降低，简称为 *Non-vault* NFT multi-chain operations protocol.
 
 
 
@@ -66,15 +66,15 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 所以我们引入了完全无 $vault$ 的跨链方案，通过引入技术安全性：
 
-- ***bSC + iSC***: 在章节II中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。在III-A中将详述对 chain $B$ 引入的新的假设约束。一旦 chain $B$ 上的资产安全可以非互操作性地实现，将降低对 $vault$ 的依赖。
+- ***bSC + iSC***: 在XClaim的方案中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。在II-A中将详述对 chain $B$ 引入的新的假设约束。一旦 chain $B$ 上的资产安全可以非互操作性地实现，将降低对 $vault$ 的依赖。
 
-- ***multi chain relay***: *chain relay* 可以提供区块链的区块和交易证明，它在XClaim扩展方案中，也被应用来减低对 $vault$ 的信任依赖。在章节III-B中，将介绍 *multi chain relay* 如何在保证安全的基础上，进一步地减少对 $vault$ 的依赖。
+- ***multi chain relay***: *chainRelay* 可以提供区块链的区块和交易证明，它在XClaim扩展方案中，也被应用来减低对 $vault$ 的信任依赖。在章节II-B中，将介绍 *multi chain relay* 如何在保证安全的基础上，进一步地减少对 $vault$ 的依赖。
 
 ### A. 区块链模型假设
 
 在目前已经上线的区块链项目中，几乎没有NFT作为链的原生资产的，所有的NFT几乎都是在智能合约内实现的。因此，对原生资产所在的chain $B$, 可以引入全新且合理的假设：
 
-- *backing blockchain* 和 *Issuing blockchain*:  都支持图灵完备的智能合约
+- *Backing blockchain* 和 *Issuing blockchain*:  都支持图灵完备的智能合约
 
 这样我们就可以通过在 $B$ 和 $I$ 上放置独立的智能合约 bSC 和 iSC 来提供更强的技术约束，保证跨链的安全性。
 
@@ -230,7 +230,27 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 
 
-#### E-II. UNFO 
+#### E-II. Cross-chain NFT Standards
+
+为了方便的标记一个物品或者一个资产，我们会用一个唯一的标识来标记它，不同的物品具有不同的标识。我们先拿物理空间里面的物品举例，在理想情况下，所有的物品都应该在同一个时空里面，这样大家都能观察的到，并且方便做区分和标识。但是现实情况是，不同的物品可能存在于不同的时空里面，并且观察者也不一定能看到每一个物品。同样的情况，在虚拟资产世界，因为存在不同的账本或称区块链网络(简称域)，不同的物品在同一个域里面因为有不同的标识，可以容易的区分和定位，但是该域里面的观察者无法识别和解析来自外部域的物品标识。
+
+目前现有的很多通证标准的设计，都主要是针对域内资产进行标识设计，没有将不同域内的资产复用考虑进来，这样导致在对非同质资产进行复用时，单独的Token ID无法标识唯一的资产，还需要带上很多域信息，实现起来十分复杂。
+
+跨链技术可以极大的帮助通证在更广泛的区块链网络中实现互联互通，但是同时，也给开发者和用户带来了一些认知和使用门槛，其中就包括通证可识别性的问题。
+
+因为目前的通证标准，例如ERC20或ERC721，只记录的其在某个特定链上的所有权信息，没有考虑到通证有可能会分布在两个区块链网络。当通证同时分布在两个区块链网络时，我们需要一套识别和解析系统帮助用户和通证应用来解析和查询当前的通证状态。当我们给出一个NFT的Token ID时，我们无法确定它目前所在区块链网络是哪个，其所有者是谁，因为当NFT发生跨链转移后，在其中一个区块链网络上该通证处于活跃状态，而其他则处于不可用状态，比如锁定状态。在没有通证解析系统的情况下，链外操作无法确定该NFT在哪条链上时处于活跃状态。
+
+跨链环境下，Token面临的识别性和解析问题，需要新的解决方案和标准来解决。因此我们引入一个基于通证跨链证明的解析系统来解决通证跨链时的定位和解析需求，通过通证解析系统和域内唯一标识，我们可以存在与不同域的通证之间的关联关系映射起来，并标识他们之间的相同与不同。
+
+NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
+
+在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
+
+- 保留NFT的跨链流转路径/历史，不损失NFT的可识别性；
+- 计算和验证解耦，拥有更高的处理速度；
+- 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
+
+为此，我们选择使用扩展的UTXO模型作为存储/状态 的流转单元，在这里我们称它为UNFO (Unspent Non-Fungible token Output).
 
 在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
 
@@ -248,70 +268,21 @@ struct UNFO {
 }
 ```
 
-当一个UNFO产生时，一定要满足：
-
-- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
-- 另一个UNFO被销毁
-  -  条件：销毁和产生的UNFO的GID必须相同
-
-![0010-UNFO-transform](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg)
 
 
+- 全局唯一标识
 
+为了将不同标准的通证标识符进行规范化，以提供识别和解析方法，与现有的标准进行很好的协调和对接，并满足社区基础设施建设的标准需求。（To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.) 跨链系统将为每一个跨链后的通证分配一个全局ID(global_id)，
 
+- 本地通证解析方式
 
-#### E-II. Bridge Core 内部结构
+通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和证明服务。
 
+在UNFO里，会标识进入Bridge Core之前，原生NFT的chainId和token id, 分别放在 type 和 value 里；lock表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约。
 
+![image-20191008134135795](/Users/denny/Library/Application Support/typora-user-images/image-20191008134135795.png)
 
-![0010-framework-of-bridge-core](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg)
-
-
-
-#### E-III. Protocols with UNFO
-
-##### Protocol: Issue
-
-![0010-multi-chain-relay-issue](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8q3raej30pz0eljsj.jpg)
-
-
-
-##### Protocol: Redeem
-
-![0010-multi-chain-relay-redeem](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8r31plj30r70elabi.jpg)
-
-### F. Open Concern: NFT Specific Design and Standards
-
-NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
-
-[WIP](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0011-darwinia-cross-chain-nft-design-and-standards.md)
-
-
-## III. Cross-chain NFT Design想要解决的问题
-
-在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
-
-- 保留NFT的跨链流转路径/历史，不损失NFT的可识别性；
-- 计算和验证解耦，拥有更高的处理速度；
-- 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
-
-为此，我们选择使用扩展的UTXO模型作为存储/状态 的流转单元，在这里我们称它为UNFO (Unspent Non-Fungible token Output).
-
-
-
-### A. UNFO Design
-
-我们将UNFO设计成更加通用的UTXO，其结构如下：
-
-```rust
-pub struct UNFO {
-    pub type: chainId,
-    pub value: Vec<u8>, // token id on chainId
-    pub lock: Script, // condition
-}
-```
-
-在UNFO里，会标识进入Bridge Core之前，原生NFT的chainId和token id, 分别放在 type 和 value 里；lock表达的是这个NFT的所有者是谁，即使得lock脚本执行成功的人；而cond_script里放着UNFO转换的一些条件限制，例如某个NFT在同一个chainID上不允许有两个不同的token id， 可以理解成智能合约。
+[TODO: Remove GUID in this ownership contract]
 
 这样，当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
 
@@ -325,93 +296,37 @@ pub struct UNFO {
 
 
 
-### B. 兼容其他跨链设施
+当一个UNFO产生时，一定要满足：
 
-因为NFT对可识别性的高要求，使得在跨链时，使用不同跨链设施可能会造成意想不到的后果。而Fungible Token则只要保证价值对称、资产安全即可。
+- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
+- 另一个UNFO被销毁
+  -  条件：销毁和产生的UNFO的GID必须相同
 
-可以想象以下场景：
-
-> nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT
-
-Alice在跨链桥M中，将nft(A, X, 1) 变为 nft(B, Y, 2) ；又通过跨链桥N，将nft(B, Y, 2) 变为 nft(C, Z, 3)。之后，当Alice想继续使用跨链桥M将C链上的nft 跨链去 A链的话，跨链桥M会将 nft(C, Z, 3) 识别为新的token，很可能在跨回A链时，将不再是nft(A, X, 1)，而是nft(A, X, 5). NFT就丢失了自己的可识别性，或者是用户就丢失了自己的资产。
-
-为了尽可能减少丢失NFT可识别性对用户造成的潜在资产损失，用户可以获取到Bridge Core上某个NFT当前的UNFO，之后，用户先使用其他跨链设施将NFT跨到UNFO中type记录的对应链之后，再使用Bridge Core 进行后续的跨链操作。
-
-这样，至少在当前系统内，NFT可保证可识别性不被破坏。
-
-在补充章节IV中，我们还将探索其他的兼容方案，例如NFT解析模块。
+![0010-UNFO-transform](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg)
 
 
 
-### C. 补充讨论： NFT解析模块
 
-为了方便的标记一个物品或者一个资产，我们会用一个唯一的标识来标记它，不同的物品具有不同的标识。我们先拿物理空间里面的物品举例，在理想情况下，所有的物品都应该在同一个时空里面，这样大家都能观察的到，并且方便做区分和标识。但是现实情况是，不同的物品可能存在于不同的时空里面，并且观察者也不一定能看到每一个物品。同样的情况，在虚拟资产世界，因为存在不同的账本或称区块链网络(简称域)，不同的物品在同一个域里面因为有不同的标识，可以容易的区分和定位，但是该域里面的观察者无法识别和解析来自外部域的物品标识。
 
-目前现有的很多通证标准的设计，都主要是针对域内资产进行标识设计，没有将不同域内的资产复用考虑进来，这样导致在对非同质资产进行复用时，单独的Token ID无法标识唯一的资产，还需要带上很多域信息，实现起来十分复杂。
-
-跨链技术可以极大的帮助通证在更广泛的区块链网络中实现互联互通，但是同时，也给开发者和用户带来了一些认知和使用门槛，其中就包括通证可识别性的问题。
-
-因为目前的通证标准，例如ERC20或ERC721，只记录的其在某个特定链上的所有权信息，没有考虑到通证有可能会分布在两个区块链网络。当通证同时分布在两个区块链网络时，我们需要一套识别和解析系统帮助用户和通证应用来解析和查询当前的通证状态。当我们给出一个NFT的Token ID时，我们无法确定它目前所在区块链网络是哪个，其所有者是谁，因为当NFT发生跨链转移后，在其中一个区块链网络上该通证处于活跃状态，而其他则处于不可用状态，比如锁定状态。在没有通证解析系统的情况下，链外操作无法确定该NFT在哪条链上时处于活跃状态。
-
-跨链环境下，Token面临的识别性和解析问题，需要新的解决方案和标准来解决。因此我们引入一个基于通证跨链证明的解析系统来解决通证跨链时的定位和解析需求，通过通证解析系统和域内唯一标识，我们可以存在与不同域的通证之间的关联关系映射起来，并标识他们之间的相同与不同。
+#### E-III. Bridge Core 内部结构
 
 
 
-### D. 设计思路
-
-通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和证明服务。
-
-#### 其他跨链共享数据
-
-目前通证标准主要的设计是针对所有权信息进行记录，但是并没有对通证的跨链转账，使用权，类型，生产商等信息进行记录，使得通证合约对通证的描述并不全面，也没有提供可扩展的方法来增加其他的信息。
-
-设计通证解析系统的一个额外好处是，因为可以把中继链看做一个共享的模块(共享存储和共享运行时SPREE)。我们引入Token解析合约(脚本)来记录和更新Token的协议、跨链、权利和其他信息。
-
-对于Polkadot架构，可以通过接入SPREE模块，在解析合约内定义约束条件，例如全局的通证总量，发行规则，并部署至SPREE模块，可以实现中继网络管辖范围的验证和可信互操作。
+![0010-framework-of-bridge-core](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg)
 
 
 
-### E. 通证解析查询消息规范
+#### E-IV. Protocols with UNFO
 
-更多关于SPREE模块的介绍，参考 https://wiki.polkadot.network/en/latest/polkadot/learn/spree
+##### Protocol: Issue
 
-
-
-### F. 通证跨链消息收集
-
-当我们讨论跨链时，一般需要分成两种情况：
-
-#### F-I. Cross parachain(同构区块链/平行链)
-
-当在平行链之间进行跨链时，例如在Polkadot网络中，因为有共享安全，ICMP等设计，因此将通证解析系统放在中继链上时最合适的，因为通证跨平行链的消息会流经中继链，中继链可以通过在消息中继模块之外，嵌入一个收集模块，将通证跨链消息规范化统一收集之后，提供给通证解析服务。
-
-#### F -II. Cross major chain (异构链，e.g Ethereum <--> Bitocin, Ethereum <-->TRON, Ethereum <--> Polkadot)
-
-在这种跨链模式下，通证跨链一般通过跨链转接桥的方案进行跨链，例如ACCS(HTLCs), XClaim, Parity Bridge(Mainet/Sidechain)。跨链消息及相关证明并未流经通证解析服务所在的中继链，而是通过设计收集人激励机制，通过收集人主动收集这些通证跨链证明。从这个角度上将，通证解析服务的链设计成中继链没有优势。
-
-但是通证解析系统设计在中继链的一个[可能的好处](https://github.com/darwinia-network/rfcs/issues/15)是，可以在跨链消息收集协议规范化之后，外部的通证跨链转接桥协议可以通过嵌入通证解析系统收集协议的方式，支持通证解析系统，以达到更好的可靠性和完整性和解析性。
-
-##### F-III. 异构链跨链转接桥解决方案XClaim的集成
-
-对于基于XClaim技术搭建的跨链转接桥，其Token的跨链是通过在对手链上构建超额抵押的对称CBA来实现的。虽然严格意义上讲，CBA不等同于原通证，但是从用户视角看其效果非常接近。
-
-[WIP]对于这类异构链之间跨链通证的支持仍有希望通过通证解析系统来描述和解析其跨链转接桥过程，只需跟中继链和平行链模式的跨链通证类型稍作区分，便可帮助开发者和用户理解其跨链通证(CBA)和原有通证的区别。
-
-因为需要喂价机制，XClaim解决方案比较适合流动性好的同质Token，但对于价格发现低效的NFT来说，就[不那么友好](https://github.com/darwinia-network/rfcs/issues/16)了。
-
-NFT的跨链转接桥方案目前缺乏相关的研究，比较务实的方案可能是由Token创建者指定信任账号作为跨链证明提交者，并结合质押以降低风险。这个方案带来一定程度中心化，但目前也没有更好的办法。
+![0010-multi-chain-relay-issue](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8q3raej30pz0eljsj.jpg)
 
 
 
-### G. 全局唯一标识
+##### Protocol: Redeem
 
-To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.
-
-通证解析系统分配的TOKEN ID将可以作为该Token在跨链网络中的全局Token标识(Base Token ID)。
-
-对于同质Token来说，因为没有通证的索引，只有数量的概念，解析通证ID可以作为全局通证ID。
-
-对于非同质Token来说，将可以使用解析通证ID加上一个Token内索引得到的编码[解析通证ID+Token_Index]作为全局唯一标识。
+![0010-multi-chain-relay-redeem](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8r31plj30r70elabi.jpg)
 
 
 
