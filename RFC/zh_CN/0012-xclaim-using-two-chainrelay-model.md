@@ -188,11 +188,13 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 
 [WIP]
 
-### B. Improments using Merkle Tree of Block Headers
+### B. Improments using Merkle Mountain Ranges
 
-[WIP]
 
-### C. Improments using Zero-knowlege Proofs.
+
+[WIP, Merkle Mountain (Merkle Tree of Merkle Tree) / Grin]
+
+### C. Improments using Zero-knowlege Proofs
 
 [WIP]
 
@@ -201,3 +203,6 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 ## VI. 参考
 
 1. https://github.com/sec-bit/zkPoD-lib
+2. https://github.com/mimblewimble/grin/blob/master/doc/mmr.md
+3. https://github.com/ipfs/specs/tree/master/merkledag
+4. https://hackernoon.com/ipfs-and-merkle-forest-a6b7f15f3537
