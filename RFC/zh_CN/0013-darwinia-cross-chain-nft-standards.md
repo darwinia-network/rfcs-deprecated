@@ -40,7 +40,7 @@
 
 <img src="/Users/hammer/Downloads/itering/code/evolutionland/rfcs/RFC/zh_CN/images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
 
-3. **访问友好**。在 [0010-darwinia-cross-chain-nft-bridge-protocol](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0010-darwinia-cross-chain-nft-bridge-protocol.md) 实现方案中，随着NFT在Bridge Core内流转的次数越多，在Bridge Core内沉淀的信息也就越多。因此外部钱包/PRC客户端只需要向Bridge Core请求一次，就可以得到该NFT在所有链的local token id 信息。而不需要向每条链分别请求获取。
+3. **访问友好**。在 [0010-darwinia-cross-chain-nft-bridge-protocol](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0010-darwinia-cross-chain-nft-bridge-protocol.md) 实现方案中，随着NFT在Bridge Core内流转的次数越多，在Bridge Core内沉淀的信息也就越多。因此外部钱包/RPC客户端只需要向Bridge Core请求一次，就可以得到该NFT在所有链的local token id 信息。而不需要向每条链分别请求获取。
 
 
 
@@ -136,7 +136,7 @@ polkadot://1/42/eth
 
 ### F. 数据请求格式
 
-如果有钱包/PRC客户端向Bridge Core请求NFT的拓扑信息，可以根据GID得到所有已知链的local ID信息：
+如果有钱包/RPC客户端向Bridge Core请求NFT的拓扑信息，可以根据GID得到所有已知链的local ID信息：
 
 ```html
 {
