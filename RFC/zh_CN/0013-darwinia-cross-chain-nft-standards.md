@@ -38,7 +38,7 @@
 
 2. **可追踪**。在NFT进入Bridge Core 后，会标识进入Bridge Core之前，原生NFT的chainId和token id, 分别放在 type 和 value 里；lock表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约。
 
-<img src="/Users/hammer/Downloads/itering/code/evolutionland/rfcs/RFC/zh_CN/images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
+<img src="./images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
 
 3. **访问友好**。在 [0010-darwinia-cross-chain-nft-bridge-protocol](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0010-darwinia-cross-chain-nft-bridge-protocol.md) 实现方案中，随着NFT在Bridge Core内流转的次数越多，在Bridge Core内沉淀的信息也就越多。因此外部钱包/RPC客户端只需要向Bridge Core请求一次，就可以得到该NFT在所有链的local token id 信息。而不需要向每条链分别请求获取。
 
