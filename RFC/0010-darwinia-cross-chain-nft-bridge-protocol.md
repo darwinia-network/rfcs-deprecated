@@ -40,7 +40,7 @@ In order to achieve a trust-free, low-cost, and efficient token cross-chain oper
 
 So far, a reliable and achievable solution has been obtained for the cross-chain of Fungible tokens with better fluidity.
 
-### B. Unresolved issues
+### B. Problems with the XClaim framework
 
 There is a basic assumption in the XClaim scheme that the total value of the native token $b$ of the chain $B$ that is chain-locked is equal to the total value of $i(b)$ issued on $I$, in XClaim. It is called *symmetric*, which is $ |b| = |i(b)|$. The assumption is that XClaim has a natural dilemma in the NFT cross-chain:
 
@@ -48,27 +48,91 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 - The value of NFT is difficult to assess. In XClaim, determining whether the $vault$ collateral is full/overdated is achieved through Oracle $O$. There is also a potential assumption that token $b$ and token $i$ can be evaluated correctly. Based on the current prosperous centralization and decentralized exchanges, this potential assumption can be basically met in the case of providing good liquidity. However, the market of the NFT exchange is not yet mature, and even the centralized exchange cannot truly reflect the market's price judgment on the NFT. How NFT is pricing itself is a problem.
 - NFT pricing is not continuous and predictable. Even if a NFT has a transaction record in the market, there is a price, because the frequency of NFT is sold far lower than FT, even if the market liquidity is very good, the next transaction price of the NFT is Not continuous or predictable.
 
-### C. Solution Description
+### C. Solutions and ideas
 
 There are two ideas for the NFT cross-chain solution to solve the above problems. One is based on the NFT extension based on the XClaim framework and retaining the bridge pledge mechanism. The Haberberg mechanism is introduced to solve the NFT pricing problem. For detailed solutions, see [RFC- 0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). But this solution still can't solve it well. Due to the large change in the price of the NFT, the problem of insufficient collateral is caused.
 
-Another idea is to introduce the chainRelay solution in the Backing Blockchain to protect the assets of the endorsement and reduce the pledge cost, which is referred to as [RFC-0012: XClaim using two chainRelay model](./0012-xclaim-using- Two-chainrelay-model.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain NFT standard, and in the case of multi-chain cross-span A cross-chain protocol with lower cost and scalability is proposed.
+Another idea is to introduce the chainRelay scheme in the Backing Blockchain to protect the assets of the endorsement, so that the pledge mechanism is no longer needed, which is referred to as [RFC-0012: XClaim using two chainRelay model] (./0012-xclaim- Using-two-chainrelay-model.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain NFT standard, and in the multi-chain cross-span In this case, a cross-chain protocol with lower cost and scalability is proposed.
 
-## II. Bridge Core - Chain Relay Hub
 
-To transfer tokens across two chains in a chain, the cost of maintaining *chain relay* in chain $I$ is very high, for example, every transaction on Ethereum requires gas. If you extend the cross-chain behavior between the two public chains to any $n$ public chain, then each strand needs to maintain $n-1$ iSC separately, which will require $C_n^2$ chain relay in total. contract. In order to reduce the maintenance cost of the system, consider implementing the core functions of the cross-chain on the parallel chain based on the substrate.
 
-#### B. *Chain Relay Hub* Architecture
-
-Then the architecture of the entire system is as follows:
+Among them, in [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains] (./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) VA, we introduced Darwinia Bridge Core Model to optimize the number of chainRelays in a blockchain network topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
 
 ![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
 
-In the figure, **Bridge Core** is a Substrate-based parachain; **vSC** is a distribution module for the corresponding chain of **Bridge Core**. Different from the previous cross-chain solution, in the architecture of the above figure, all the tokens of the chain need to first enter the **Bridge Core**, and then convert to the iSC corresponding to the destination public link in the **Bridge Core** Finally, the corresponding assets are issued on the corresponding public chain, and the entire cross-chain operation is completed.
+## III. NFT in Darwinia Bridge Core
+
+The difficulty of NFT cross-chain operation is that different public chains have their own NFT standards, and even the NFT token ids on different public chains are not equal in length. When NFT crosses different public chains, it will inevitably experience token id. Conversion. How to avoid the identifiability of NFT in the process of cross-chain is a proposition worth studying.
+
+When designing NFT flow logic in Bridge Core, we want to solve the following three problems:
+
+- Preserving the NFT's cross-chain flow path/history without losing the identifiability of the NFT;
+- Calculate and verify decoupling with higher processing speed;
+- Implement additional functions, such as NFT to complete decomposition, merging, etc. while cross-chaining;
+
+To this end, we chose to use the extended UTXO model as a storage/state flow unit, which we call UNFO (Unspent Non-Fungible token Output).
+
+The NFT in the intermediate state within Bridge Core is marked as $nft_{BC}^{X,n}$ above, indicating that there is an NFT to be issued/locked in the corresponding chain $X$. 
+
+These intermediate states of NFT in Bridge Core are marked as UNFO (Unspent Non-Fungible Output). The idea stems from UTXO, when an UNFO is destroyed, it means that a new UNFO will be generated at the same time.
+
+### A. UNFO structure
+
+UNFO structure:
+
+```rust
+Struct UNFO {
+  Pub local_id, // chain_id + smart_cotnract_id + token_id
+  Pub global_id,
+  Pub phase, // current phase
+  Pub lock_script, // eg ownership or state management
+}
+```
+
+- **local_id**: indicates that the UNFO corresponds to *token_id* in a *smart_contract_id* on an external blockchain *chain_id*
+- **global_id**: indicates that UNFO is globally unique in the scope of Bridge Core and all boquelous blockchains
+- **phase**: Indicates the stage in which the UNFO is in the process of cross-chaining. such as:
+  - 1: The NFT on the UNFO corresponding blockchain *chain_id* is locked/destroyed; the cross-chain process is in the intermediate state;
+  - 2: The NFT on the UNFO corresponding blockchain *chain_id* is pending/issued; the cross-chain process is nearing completion / completed
+- **lock_script**: for more complex logic, fine-grained control scripts, maintaining UNFO's scalability
 
 
 
-### C. Component Definition
+### B. UNFO conversion
+
+When the destruction of one UNFO means the creation of another UNFO, if we trace the history of UNFO's destruction creation, we can trace back the entire cross-chain history of an NFT, which helps to achieve the NFT's recognizability to a certain extent;
+
+Each UNFO can only be destroyed once, which makes it unnecessary to verify before the calculation, thus improving the processing speed;
+
+Just like Bitcoin's UTXO, there can be more than one Input and Output. This feature allows the NFT to perform some extended functions, such as NFT splitting and merging, in the process of cross-chaining.
+
+NFT has always been more useful than FT. For example, in games, the NFT as a prop is required to be detachable, synthesizable, and scalable. For this reason, many NFT standards, such as ERC721 and ERC1155, have been extended. ERC721X and so on. The more standards, the more difficult it is to be widely used.
+
+If some of the common requirements can be implemented at the same time across the chain, the number and redundancy of standards can be effectively reduced, and to a certain extent, it is more conducive to achieve a unified standard.
+
+
+
+When an UNFO is produced, it must be satisfied:
+
+- Provide a lock record for the corresponding NFT of *backing blockchain*;
+- Another UNFO is destroyed
+  - Condition: The GID of the destroyed and produced UNFO must be the same
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
+
+
+
+
+
+### C. Bridge Core Internal Structure
+
+
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
+
+
+
+### D. Component definition
 
 - *Issuing Smart Contract*, $iSC_N$: indicates the asset issuance contract on chain *N*;
 - *Backing Smart Contract*, $bSC_N$ : indicates an asset lockout contract on chain $N$;
@@ -85,9 +149,9 @@ In the figure, **Bridge Core** is a Substrate-based parachain; **vSC** is a dist
 
 participants:
 
-- *witness*, maintains the participants of the Bridge Core;
+- *validator*, maintains the participants of the Bridge Core;
 
-### D. Preliminary implementation plan
+### E. Preliminary implementation plan
 
 The scenario is the same as described in Chapter II. Still need to implement three kinds of protocols: *Issue, Transfer, Redeem*. Also to simplify the model, the details of the fee will not be discussed here.
 
@@ -105,6 +169,8 @@ In $vSC_I$:
 - Destroy $nft_{BC}^{B,n}$, issue $nft_{BC}^{I,?}$, $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_ {issue}$
 
 (iii) *** issuance ***. *requester* Submit $EX_{issue}$ to chain $I$ , after the chain relay on chain $I$ is verified, a new NFT will be added to $iSC_I$: $nft_I^{x', n '}$, and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
 
@@ -129,15 +195,13 @@ The above process is triggered in an Extrinsic, which will generate an Extrinsic
 
 (iii) ***Unlock ***. *redeemer* submits $EX_{redeem}$ to chain $B$ , after $iSC_B$ verification, the corresponding relationship between $GUID$ and $nft_B^{x,n}$ is recorded in $iSC_B$ The method in $bSC_B$ is triggered atomically, and $nft_B^{x,n}$ is returned to the specified address.
 
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
-
-### E. Implementation
-
-#### EI. Specification
+### F. Algorithms 
 
 ##### Protocol: Issue
 
-![image-20190927184316820](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8t97jjj318k0jidig.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg" alt="image-20191010113808729" style="zoom:50%;" />
 
 Explanation:
 
@@ -147,13 +211,13 @@ Explanation:
 
 - **verifyBOp**(lockB, $T_B^{lock}$, $\Delta_{lock}$) $\rightarrow T$ : Occurs in Bridge Core. *requester* submits $T_B^{lock}$ to $vSC_B$ in Bridge Core for verification if $T_B^{lock}$ actually happened on chain $B$ and satisfies the minimum required delay $\Delta_ {lock}$, which returns the result T(True), otherwise returns F(False).  
 
-  If the result is T, then newGid($nft_B^{x,n}$) is automatically triggered in $vSC_B$, a new GID is generated, and $nft_B^{x,n}$ is mirrored in Bridge Core $nft_ {BC}^{B,n}$ 
+  If the result is T, then newGid($nft_B^{x,n}$) is automatically triggered in $vSC_B$, a new GID is generated, and $nft_B^{x,n}$ is mirrored in Bridge Core $nft_ {BC}^{B,n}$ and establish the correspondence between GID and $nft_{BC}^{B,n}$
 
 - **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $I$. *requester* Submit $EX_{issue}$ to $iSC_I$ in chain $I$, returning T if $iSC_I$ verifies the authenticity of $EX_{issue}$, otherwise returns F. After the verification is passed, by issuing the issue method, $nft_I^{x',n'}$ is issued to *requester* at the address of chain $I$.
 
-###### *witness* Related Operations:
+###### *validator* Related Operations:
 
-- **trigger**($vSC_I,\ pk_I^{requester},\ GID$ ): *witness* Trigger the method in $vSC_I$, destroy $nft_{BC}^{B,n}$ and generate $ Nft_{BC}^{I,?}$, which means that the nft image will be added on the chain $I$ (this is why $?$ is used because the nft on the chain $I$ has not been added yet. Therefore, its token id cannot be obtained. This operation will generate $EX_{issue}$.
+- **issueTransform**($vSC_I,\ pk_I^{requester},\ GID$ ): *validator* will automatically trigger the method in $vSC_I$ to destroy $nft_{BC}^{B,n}$ and Generate $nft_{BC}^{I,?}$ to indicate that the nft image will be added on the chain $I$ (this is why $?$ is used because the nft on the chain $I$ has not been added yet) , so it is not possible to get its token id) and establish a correspondence between GID and $nft_{BC}^{I,?}$. This operation will generate $EX_{issue}$.
 
 
 
@@ -169,21 +233,23 @@ Calling the transfer method in $iSC_I$ on chain $I$ *sender* sends $nft_I^{x',n'
 
 ##### Protocol: Redeem
 
-![image-20190927192023177](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8s2dq8j30ze0hqmzn.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhfdu6j314w0q0n0c.jpg" alt="image-20191010114326817" style="zoom:50%;" />
 
 Explanation:
 
 ###### *redeemer* Related Operations:
 
-- **lockI**( $nft_I^{x',n'}$, $GID$, $pk_B^{redeemer}$ ) : Occurs on chain $I$. *redeemer* locks $nft_I^{x',n'}$ in $bSC_I$, and $bSC_I$ can atomically check the correspondence between $GID$ and $nft_I^{x',n'}$. This operation will generate the transaction $T_I^{redeemer}$
-- **verifyIOp**(lockI, $T_I^{redeemer}$, $\Delta_{redeem}$) : Occurs in Bridge Core. The user submits $T_I^{redeem}$ to $vSC_I$. If $T_I^{redeem}$ actually happened on chain $I$ and met the minimum required delay of $\Delta_{redeem}$, then Find the corresponding $nft_{BC}^{I,?}$ according to $GID$ and automatically complete it to $nft_{BC}^{I,n'}$
+- **burn**( $nft_I^{x',n'}$, $GID$, $pk_B^{redeemer}$ ) : Occurs on chain $I$. *redeemer* Triggers $bSC_I$ to destroy $nft_I^{x',n'}$, but keeps the destruction record, $bSC_I$ can atomically check $GID$ and $nft_I^{x',n'} $ Correspondence. This will generate the transaction $T_I^{redeem}$
+- **verifyIOp**(burn, $T_I^{redeem}$, $\Delta_{redeem}$) : Occurs in Bridge Core. The user submits $T_I^{redeem}$ to $vSC_I$. If $T_I^{redeem}$ actually happened on chain $I$ and met the minimum required delay of $\Delta_{redeem}$, then Find the corresponding $nft_{BC}^{I,?}$ according to $GID$ and automatically complete it to $nft_{BC}^{I,n'}$
 - **verifyBCOp**(trigger, $EX_{redeem}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $B$. *redeemer* Submit $EX_{redeem}$ to $iSC_B$ in chain $B$. If $iSC_B$ verifies the authenticity of $EX_{redeem}$, it returns T, otherwise it returns F. After the verification is passed, by calling the issue method, $nft_B^{x,n}$ is released to *redeemer* at the address of chain $B$.
 
-###### *witness* Related Operations:
+###### *validator* Related Operations:
 
-- **trigger**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *witness* Trigger the method in $vSC_B$, $nft_{BC }^{I,n'}$ is converted to $nft_{BC}^{B,n}$, which represents the image of nft to be released on the chain $B$. This operation will generate $EX_{redeem}$.
+- **burnTransform**($vSC_B,\GID,\nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* automatically triggers the method in $vSC_B$, which will be $nft_{ BC}^{I,n'}$ destroys both $nft_{BC}^{B,n}$, indicating the image of nft to be released on chain $B$. This operation will generate $EX_{redeem}$.
 
 
+
+## 
 
 ## IV. Cross-chain NFT Standards
 
@@ -197,32 +263,6 @@ Because current pass standards, such as ERC20 or ERC721, only record ownership i
 
 In a cross-chain environment, Token's identification and resolution problems require new solutions and standards to solve. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
 
-The difficulty of NFT cross-chain operation is that different public chains have their own NFT standards, and even the NFT token ids on different public chains are not equal in length. When NFT crosses different public chains, it will inevitably experience token id. Conversion. How to avoid the identifiability of NFT in the process of cross-chain is a proposition worth studying.
-
-When designing NFT flow logic in Bridge Core, we want to solve the following three problems:
-
-- Preserving the NFT's cross-chain flow path/history without losing the identifiability of the NFT;
-- Calculate and verify decoupling with higher processing speed;
-- Implement additional functions, such as NFT to complete decomposition, merging, etc. while cross-chaining;
-
-To this end, we chose to use the extended UTXO model as a storage/state flow unit, which we call UNFO (Unspent Non-Fungible token Output).
-
-The NFT in the intermediate state within Bridge Core is marked as $nft_{BC}^{X,n}$ above, indicating that there is an NFT to be issued/locked in the corresponding chain $X$. 
-
-These intermediate states of NFT in Bridge Core are marked as UNFO (Unspent Non-Fungible Output). The idea stems from UTXO, when an UNFO is destroyed, it means that a new UNFO will be generated at the same time.
-
-
-
-UNFO structure:
-
-```rust
-Struct UNFO {
-  Pub local_id, // chain_id + smart_cotnract_id + token_id
-  Pub global_id,
-  Pub lock_script, // eg to check if it is locked or unlocked
-}
-```
-
 
 
 ### A. Globally unique identifier
@@ -235,53 +275,11 @@ The pass-through parsing module is a module embedded in the NFT cross-chain prot
 
 In UNFO, the chainId and token id of the native NFT are placed in the type and value before entering the Bridge Core. The lock indicates who the owner of the NFT is. When the NFT is circulating within the Bridge Core, The lock_script may point to an ownership contract. When the NFT is locked in the backing contract, the lock_script may point to the redeem contract of the backing contract.
 
-![image-20191008134135795](/Users/denny/Library/Application Support/typora-user-images/image-20191008134135795.png)
+<img src="./images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
 
-[TODO: Remove GUID in this ownership contract]
+### C. Non-fungible Token Standards on Polkadot/Darwinia
 
-In this way, when the destruction of one UNFO means the creation of another UNFO, if we trace the history of UNFO's destruction, we can trace back the entire cross-chain history of an NFT, which helps to achieve the NFT's recognizability to a certain extent;
-
-Each UNFO can only be destroyed once, which makes it unnecessary to verify before the calculation, thus improving the processing speed;
-
-Just like Bitcoin's UTXO, there can be more than one Input and Output. This feature allows the NFT to perform some extended functions, such as NFT splitting and merging, in the process of cross-chaining.
-
-NFT has always been more useful than FT. For example, in games, the NFT as a prop is required to be detachable, synthesizable, and scalable. For this reason, many NFT standards, such as ERC721 and ERC1155, have been extended. ERC721X and so on. The more standards, the more difficult it is to be widely used.
-
-If some of the common requirements can be implemented at the same time across the chain, the number and redundancy of standards can be effectively reduced, and to a certain extent, it is more conducive to achieve a unified standard.
-
-
-
-When an UNFO is produced, it must be satisfied:
-
-- Provide a lock record for the corresponding NFT of *backing blockchain*;
-- Another UNFO is destroyed
-  - Condition: The GID of the destroyed and produced UNFO must be the same
-
-![0010-UNFO-transform](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg)
-
-
-
-
-
-### C. Bridge Core Internal Structure
-
-
-
-![0010-framework-of-bridge-core](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg)
-
-
-
-### D. Protocols with UNFO
-
-##### Protocol: Issue
-
-![0010-multi-chain-relay-issue](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8q3raej30pz0eljsj.jpg)
-
-
-
-##### Protocol: Redeem
-
-![0010-multi-chain-relay-redeem](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8r31plj30r70elabi.jpg)
+[WIP]
 
 
 

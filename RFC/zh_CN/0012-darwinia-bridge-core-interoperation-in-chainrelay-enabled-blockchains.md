@@ -2,7 +2,7 @@
 rfc: 12
 title: 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains
 status: Draft
-desc: XClaim Using Two Chain Relay Model
+desc: Darwinia Bridge Core - Interoperation in ChainRelay Enabled Blockchains
 
 ---
 
