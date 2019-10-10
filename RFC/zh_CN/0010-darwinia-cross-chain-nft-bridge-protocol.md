@@ -263,13 +263,13 @@ struct UNFO {
 
 ##### Protocol: Issue
 
-![chain-relay-framework (https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg)](/Users/hammer/Downloads/chain-relay-framework (1).jpg)
+![chain-relay-framework-1](https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg)
 
 
 
 ##### Protocol: Redeem
 
-![chain-relay-framework (https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg)](/Users/hammer/Downloads/chain-relay-framework (2).jpg)
+![chain-relay-framework-2](https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg)
 
 
 
@@ -299,9 +299,11 @@ struct UNFO {
 
 在UNFO里，会标识进入Bridge Core之前，原生NFT的chainId和token id, 分别放在 type 和 value 里；lock表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约。
 
-![image-20191008134135795](/Users/denny/Library/Application Support/typora-user-images/image-20191008134135795.png)
+<img src="./images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
 
-[TODO: Remove GUID in this ownership contract]
+### C. Non-fungible Token Standards on Polkadot/Darwinia
+
+[WIP]
 
 
 
