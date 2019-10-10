@@ -1,12 +1,12 @@
 ---
 rfc: 12
-title: 0012-xclaim-using-two-chainrelay-model
+title: 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains
 status: Draft
 desc: XClaim Using Two Chain Relay Model
 
 ---
 
-# XClaim Using Two ChainRelay Model
+# Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains
 
 
 
@@ -180,7 +180,23 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 
 
 
-## V. Chain Relay Maintenance Cost and Improments
+## V. Darwinia Bridge Core - Chain Relay Topology Optimization
+
+在两条公链中跨链转移token，需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，总共将需要$C_n^2$个chain relay合约。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
+
+### A. *Darwinia Bridge Core* 架构
+
+那么整个系统的架构如下：
+
+![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
+
+图中 **Bridge Core** 即为平行链上包含通证跨链和各chain relay的核心模块；**vSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
+
+### B. Overview
+
+[WIP]
+
+## VI. Chain Relay Maintenance Cost and Improments
 
 将Backing Blockchain中的Collateral Vault模型改成chain relay方案除了需要Backing Blockchain的智能合约支持，还有一个缺点和需要考虑的地方，就是维护chain relay的成本，尤其是像以太坊这样的燃料费比较贵的区块链网络。
 

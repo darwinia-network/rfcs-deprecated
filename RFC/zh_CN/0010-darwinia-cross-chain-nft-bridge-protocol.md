@@ -40,7 +40,7 @@ desc: Cross-chain NFT Bridge Protocol
 
 至此，对于流动性较好的Fungible token的跨链，已经得到一个可靠的、可实现的方案。
 
-### B. 尚未解决的问题
+### B. XClaim框架存在的问题
 
 XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生token $b$ 的总价值， 与在 $I$ 上发行出的 $i(b)$ 的总价值相等，在XClaim中被称为*symmetric*, 即 $ |b| = |i(b)|$。这样的假设是的XClaim在NFT的跨链中存在着天然的困境：
 
@@ -48,27 +48,91 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 - NFT的价值难以评估。在XClaim中，判断 $vault$ 的抵押是否足额/超额，是通过Oracle $O$ 实现的。这也存在一个潜在的假设：token $b$ 和 token $i$ 可以被正确地评估价值。基于目前繁荣的中心化和去中心化交易所，在提供了良好的流动性的情况下，是可以基本满足该潜在假设的。但是NFT交易所市场尚未成熟，即使中心化交易所也无法比较真实地反应市场对NFT的价格判断。NFT如何定价本身就是一个难题。
 - NFT定价不具有连续性和可预测性。即使某个NFT在市场上有了一次成交记录，即有了一个价格，因为NFT被售出的频次远低于FT，即使在市场流动性非常好的情况下，该NFT下一次的成交价格既不连续，也不可预测。
 
-### C. Solution Description
+### C. 解决方案和思路
 
 解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
 
 另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得不再需要质押机制，简称为[RFC-0012: XClaim using two chainRelay model](./0012-xclaim-using-two-chainrelay-model.md)，详细的介绍将不在本文进行详细介绍，本文将着重基于这个改进的跨链转接桥方案，设计一个跨链的NFT标准，并且在多链互跨的情况下，提出了更低成本、功能具备扩展性的跨链协议。
 
-## III. Bridge Core - Chain Relay Hub
 
-在两条公链中跨链转移token，需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，总共将需要$C_n^2$个chain relay合约。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
 
-#### B. *Chain Relay Hub* 架构
-
-那么整个系统的架构如下：
+其中，在[RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) V.A中，我们引入了Darwinia Bridge Core的模型，用来优化区块链网络拓扑中的chainRelay数量。本文将基于Darwinia Bridge Hub，并针对NFT特定领域的问题，进行细化设计。
 
 ![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
 
-图中 **Bridge Core** 即为基于Substrate 的 parachain；**vSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
+## III. NFT in Darwinia Bridge Core
+
+NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
+
+在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
+
+- 保留NFT的跨链流转路径/历史，不损失NFT的可识别性；
+- 计算和验证解耦，拥有更高的处理速度；
+- 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
+
+为此，我们选择使用扩展的UTXO模型作为存储/状态 的流转单元，在这里我们称它为UNFO (Unspent Non-Fungible token Output).
+
+在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
+
+在 Bridge Core 内这些 中间态的NFT被标记为 UNFO (Unspent Non-Fungible Output). 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
+
+### A. UNFO structure
+
+UNFO的结构：
+
+```rust
+struct UNFO {
+  pub local_id, // chain_id + smart_cotnract_id + token_id
+  pub global_id,
+  pub phase, // current phase
+  pub lock_script, // e.g. ownership or state management
+}
+```
+
+- **local_id**：表示该UNFO对应着某个外部区块链 *chain_id* 上某个 *smart_contract_id* 里的 *token_id*
+- **global_id**：表示该UNFO在Bridge Core和所有被夸的区块链范围内的全局唯一标识
+- **phase**：表示该UNFO在跨链过程中所处的阶段。比如：
+  - 1: 该UNFO对应区块链 *chain_id* 上的NFT被锁定/销毁；跨链过程处于中间状态；
+  - 2: 该UNFO对应区块链 *chain_id* 上的NFT待发行/已发行；跨链过程即将完成/已完成
+- **lock_script**：用于更加复杂逻辑、细粒度的控制脚本，保持UNFO的可扩展性
 
 
 
-### C. 组件定义
+### B. UNFO的转换
+
+当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
+
+每个UNFO只能被销毁一次，这使得计算前不一定要先验证，从而提高了处理速度；
+
+正如比特币的UTXO一样，Input和Output都可以有多个，这样的特点使得NFT在跨链的过程中，可以同时完成一些扩展功能，例如NFT的拆分和合并。
+
+一直一来，NFT都比FT有用更多的操作种类，例如在游戏中，作为道具的NFT要求可拆解、可合成、可升级等，为此扩展出了很多NFT标准，例如ERC721, ERC1155, ERC721X等。标准越多，越难被广泛使用。
+
+如果其中的一些通用需求可以在跨链同时实现，可以有效地减少标准的数量和冗余度，一定程度上更有利于实现一个统一的标准。
+
+
+
+当一个UNFO产生时，一定要满足：
+
+- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
+- 另一个UNFO被销毁
+  - 条件：销毁和产生的UNFO的GID必须相同
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
+
+
+
+
+
+### C. Bridge Core 内部结构
+
+
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
+
+
+
+### D. 组件定义
 
 - *Issuing Smart Contract*,  $iSC_N$:  表示在 chain *N* 上的资产发行合约；
 - *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
@@ -87,7 +151,7 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 - *validator*,  维护 Bridge Core 的参与方；
 
-### D. 初步实现方案
+### E. 初步实现方案
 
 场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
 
@@ -105,6 +169,8 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 -  销毁  $nft_{BC}^{B,n}$，发行 $nft_{BC}^{I,?}$， $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{issue}$
 
 (iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 并记录 $GID$ 和 $nft_I^{x', n'}$的关系， 且将所有权交给 *requester* 在chain *I* 上的地址
+
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
 
@@ -129,15 +195,13 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 (iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。 
 
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
-
-### E. Implementation
-
-#### E-I. Specification
+### F. Algorithms 
 
 ##### Protocol: Issue
 
-![image-20191010113808729](https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg" alt="image-20191010113808729" style="zoom:50%;" />
 
 解释：
 
@@ -169,7 +233,7 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 ##### Protocol: Redeem
 
-![image-20191010114326817](https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhfdu6j314w0q0n0c.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhfdu6j314w0q0n0c.jpg" alt="image-20191010114326817" style="zoom:50%;" />
 
 解释：
 
@@ -182,94 +246,6 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 ###### *validator* 相关操作：
 
 - **burnTransform**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* 自动触发 $vSC_B$ 中的方法， 将 $nft_{BC}^{I,n'}$ 销毁同时产生 $nft_{BC}^{B,n}$, 表示在chain $B$ 上即将释放的nft的镜像。这次操作将产生 $EX_{redeem}$.
-
-
-
-### F. NFT in Bridge Core
-
-NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
-
-在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
-
-- 保留NFT的跨链流转路径/历史，不损失NFT的可识别性；
-- 计算和验证解耦，拥有更高的处理速度；
-- 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
-
-为此，我们选择使用扩展的UTXO模型作为存储/状态 的流转单元，在这里我们称它为UNFO (Unspent Non-Fungible token Output).
-
-在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
-
-在 Bridge Core 内这些 中间态的NFT被标记为 UNFO (Unspent Non-Fungible Output). 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
-
-#### F-I. UNFO structure
-
-UNFO的结构：
-
-```rust
-struct UNFO {
-  pub local_id, // chain_id + smart_cotnract_id + token_id
-  pub global_id,
-  pub phase, // current phase
-  pub lock_script, // e.g. ownership or state management
-}
-```
-
-- **local_id**：表示该UNFO对应着某个外部区块链 *chain_id* 上某个 *smart_contract_id* 里的 *token_id*
-- **global_id**：表示该UNFO在Bridge Core和所有被夸的区块链范围内的全局唯一标识
-- **phase**：表示该UNFO在跨链过程中所处的阶段。比如：
-  - 1: 该UNFO对应区块链 *chain_id* 上的NFT被锁定/销毁；跨链过程处于中间状态；
-  - 2: 该UNFO对应区块链 *chain_id* 上的NFT待发行/已发行；跨链过程即将完成/已完成
-- **lock_script**：用于更加复杂逻辑、细粒度的控制脚本，保持UNFO的可扩展性
-
-
-
-#### F-II. UNFO的转换
-
-当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
-
-每个UNFO只能被销毁一次，这使得计算前不一定要先验证，从而提高了处理速度；
-
-正如比特币的UTXO一样，Input和Output都可以有多个，这样的特点使得NFT在跨链的过程中，可以同时完成一些扩展功能，例如NFT的拆分和合并。
-
-一直一来，NFT都比FT有用更多的操作种类，例如在游戏中，作为道具的NFT要求可拆解、可合成、可升级等，为此扩展出了很多NFT标准，例如ERC721, ERC1155, ERC721X等。标准越多，越难被广泛使用。
-
-如果其中的一些通用需求可以在跨链同时实现，可以有效地减少标准的数量和冗余度，一定程度上更有利于实现一个统一的标准。
-
-
-
-当一个UNFO产生时，一定要满足：
-
-- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
-- 另一个UNFO被销毁
-  - 条件：销毁和产生的UNFO的GID必须相同
-
-![0010-UNFO-transform](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg)
-
-
-
-
-
-### F-III. Bridge Core 内部结构
-
-
-
-![0010-framework-of-bridge-core](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg)
-
-
-
-
-
-### F-IV. Protocols with UNFO
-
-##### Protocol: Issue
-
-![chain-relay-framework-1](https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg)
-
-
-
-##### Protocol: Redeem
-
-![chain-relay-framework-2](https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg)
 
 
 
