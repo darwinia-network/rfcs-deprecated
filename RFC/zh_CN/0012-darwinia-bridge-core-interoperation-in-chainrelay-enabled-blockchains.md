@@ -208,7 +208,7 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 
 
 
-[WIP, Merkle Mountain (Merkle Tree of Merkle Tree) / Grin]
+[WIP, Merkle Mountain Range]
 
 ### C. Improments using Zero-knowlege Proofs
 

@@ -52,13 +52,13 @@ XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生t
 
 解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
 
-另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得不再需要质押机制，简称为[RFC-0012: XClaim using two chainRelay model](./0012-xclaim-using-two-chainrelay-model.md)，详细的介绍将不在本文进行详细介绍，本文将着重基于这个改进的跨链转接桥方案，设计一个跨链的NFT标准，并且在多链互跨的情况下，提出了更低成本、功能具备扩展性的跨链协议。
+另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得不再需要质押机制，简称为[RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md)，详细的介绍将不在本文进行详细介绍，本文将着重基于这个改进的跨链转接桥方案，设计一个跨链的NFT标准，并且在多链互跨的情况下，提出了更低成本、功能具备扩展性的跨链协议。
 
 
 
-其中，在[RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) V.A中，我们引入了Darwinia Bridge Core的模型，用来优化区块链网络拓扑中的chainRelay数量。本文将基于Darwinia Bridge Hub，并针对NFT特定领域的问题，进行细化设计。
+其中，在[RFC-0012](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) V.A中，我们引入了Darwinia Bridge Core的模型，用来优化区块链网络拓扑中的chainRelay数量。本文将基于Darwinia Bridge Hub，并针对NFT特定领域的问题，进行细化设计。
 
-![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg" alt="chain-relay-framework" style="zoom:80%;" />
 
 ## III. NFT in Darwinia Bridge Core
 
@@ -70,15 +70,37 @@ NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚�
 - 计算和验证解耦，拥有更高的处理速度；
 - 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
 
-为此，我们选择使用扩展的UTXO模型作为存储/状态 的流转单元，在这里我们称它为UNFO (Unspent Non-Fungible token Output).
 
-在 Bridge Core 内的 中间状态的NFT在上文中被标记为 $nft_{BC}^{X,n}$ ，表示在对应 chain $X$ 中有一个即将被发行/已锁定的 NFT. 
 
-在 Bridge Core 内这些 中间态的NFT被标记为 UNFO (Unspent Non-Fungible Output). 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
+为此，我们选择为每个经过Bridge Core跨链的NFT引入一些中间解析状态，称为UNFO (Unspent NFT Ouput)，这些UNFO状态将维护一个Bridge Core上全局的ID，并借由跨链流通证明记录全局ID和NFT外部本地ID的映射关系。UNFO并不一定具体负责该NFT在Bridge Core范围内的所有权管理(Ownership Management)，但也可以借由一个$lock\_script$进行扩展，例如通过将$lock\_script$指向Bridge Core内部的一个所有权管理合约。
 
-### A. UNFO structure
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
 
-UNFO的结构：
+
+
+### A. 组件定义
+
+- *Issuing Smart Contract*,  $iSC_N$:  表示在 chain *N* 上的资产发行合约；
+- *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
+- *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
+- *Global identifier* ,  $GID$ , The global idendifier for the NFT in Darwinia Bridge Core
+- *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
+- *External NFT*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
+- *Bridge Core NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  或简称$nft_{BC}^{B, n}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像，表示在对应 chain $B$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
+- *External NFT*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
+- *Bridge Core NFT*,$nft_{BC(unfo_{gid})}^{I,x',n'}$, 或简称 $nft_{BC}^{I, n'}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像，表示在对应 chain $I$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
+- *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
+- *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
+- *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易 
+- *Extrinsic redeem*,  $EX_{redeem}$ , Bridge Core上的 redeem 的交易 
+
+参与方：
+
+- *validator*,  维护 Bridge Core 的参与方；
+
+### B. UNFO 数据结构和实现
+
+#### B.I UNFO的结构
 
 ```rust
 struct UNFO {
@@ -98,7 +120,9 @@ struct UNFO {
 
 
 
-### B. UNFO的转换
+#### B.II. UNFO的转换
+
+我们选择用UNFO模型作为存储/状态 的流转单元，UNFO模型是一种类似UTXO模型的设计思路。
 
 当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
 
@@ -122,36 +146,7 @@ struct UNFO {
 
 
 
-
-
-### C. Bridge Core 内部结构
-
-
-
-<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
-
-
-
-### D. 组件定义
-
-- *Issuing Smart Contract*,  $iSC_N$:  表示在 chain *N* 上的资产发行合约；
-- *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
-- *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
-- *NFT identifier*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
-  - *NFT identifier in Bridge Core*, $nft_{BC}^{B, n}$ ，表示在Bridge Core，并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像
-- *NFT identifier*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
-  - *NFT identifier in Bridge Core*, $nft_{BC}^{I, n'}$ ，表示在Bridge Core，并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像
-- *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
-- *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
-- *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易 
-- *Extrinsic redeem*,  $EX_{redeem}$ , Bridge Core上的 redeem 的交易 
-- *Global NFT identifier*,  $GID$
-
-参与方：
-
-- *validator*,  维护 Bridge Core 的参与方；
-
-### E. 初步实现方案
+### C. 初步实现方案
 
 场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
 
@@ -184,7 +179,7 @@ struct UNFO {
 
 (ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
 
-- 记录 $GUID$ 和 $nft_I^{x', n'}$ 的对应关系，
+- 记录 $GID$ 和 $nft_I^{x', n'}$ 的对应关系，
 - 判断目的地公链并触发相应的 $vSC_B$ ,
 
 在 $vSC_B$ 中, 
@@ -197,7 +192,7 @@ struct UNFO {
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
-### F. Algorithms 
+### D. Algorithms 
 
 ##### Protocol: Issue
 
@@ -277,7 +272,7 @@ struct UNFO {
 
 <img src="./images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
 
-### C. Non-fungible Token Standards on Polkadot/Darwinia
+### C. NFT Ownership Management Standards
 
 [WIP]
 
