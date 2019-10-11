@@ -1,7 +1,7 @@
 ---
 rfc: 11
 title: 0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals
-status: Draft
+status: Abandoned
 desc: XClaim Based NFT Solution Using Harberger Tax
 ---
 

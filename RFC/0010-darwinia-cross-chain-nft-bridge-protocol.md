@@ -8,7 +8,7 @@ Desc: Cross-chain NFT Bridge Protocol
 
 # Cross-chain NFT Bridge Protocol			
 
-### v 0.2.2
+### v 0.3.0
 
 
 
@@ -42,7 +42,7 @@ So far, a reliable and achievable solution has been obtained for the cross-chain
 
 ### B. Problems with the XClaim framework
 
-There is a basic assumption in the XClaim scheme that the total value of the native token $b$ of the chain $B$ that is chain-locked is equal to the total value of $i(b)$ issued on $I$, in XClaim. It is called *symmetric*, which is $ |b| = |i(b)|$. The assumption is that XClaim has a natural dilemma in the NFT cross-chain:
+There is a basic assumption in the XClaim scheme that the total value of the native token $b$ of the chain $B$ that is chain-locked is equal to the total value of $i(b)$ issued on $I$, in XClaim. It is called *symmetric*, which is $\|b\| = \|i(b)\|$. The assumption is that XClaim has a natural dilemma in the NFT cross-chain:
 
 - The irreplaceability of NFT. Because of the identifiability and irreplaceability of NFT, it is impossible for $vault$ to mortgage NFT $nft_b$ on chain $B$ on chain $I$.
 - The value of NFT is difficult to assess. In XClaim, determining whether the $vault$ collateral is full/overdated is achieved through Oracle $O$. There is also a potential assumption that token $b$ and token $i$ can be evaluated correctly. Based on the current prosperous centralization and decentralized exchanges, this potential assumption can be basically met in the case of providing good liquidity. However, the market of the NFT exchange is not yet mature, and even the centralized exchange cannot truly reflect the market's price judgment on the NFT. How NFT is pricing itself is a problem.
@@ -52,13 +52,13 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 There are two ideas for the NFT cross-chain solution to solve the above problems. One is based on the NFT extension based on the XClaim framework and retaining the bridge pledge mechanism. The Haberberg mechanism is introduced to solve the NFT pricing problem. For detailed solutions, see [RFC- 0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). But this solution still can't solve it well. Due to the large change in the price of the NFT, the problem of insufficient collateral is caused.
 
-Another idea is to introduce the chainRelay scheme in the Backing Blockchain to protect the assets of the endorsement, so that the pledge mechanism is no longer needed, which is referred to as [RFC-0012: XClaim using two chainRelay model] (./0012-xclaim- Using-two-chainrelay-model.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain NFT standard, and in the multi-chain cross-span In this case, a cross-chain protocol with lower cost and scalability is proposed.
+Another idea is to introduce the chainRelay solution in the Backing Blockchain to protect the assets of the endorsement, so that the pledge mechanism is no longer needed, which is referred to as [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains] (./ 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain The NFT standard, and in the case of multi-chain cross-over, proposes a lower cost, functionally scalable cross-chain protocol.
 
 
 
-Among them, in [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains] (./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) VA, we introduced Darwinia Bridge Core Model to optimize the number of chainRelays in a blockchain network topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
+Among them, in [RFC-0012] (./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) VA, we introduced the Darwinia Bridge Core model to optimize the blockchain network. The number of chainRelays in the topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
 
-![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg" alt="chain-relay-framework" style="zoom:80%;" />
 
 ## III. NFT in Darwinia Bridge Core
 
@@ -70,15 +70,37 @@ When designing NFT flow logic in Bridge Core, we want to solve the following thr
 - Calculate and verify decoupling with higher processing speed;
 - Implement additional functions, such as NFT to complete decomposition, merging, etc. while cross-chaining;
 
-To this end, we chose to use the extended UTXO model as a storage/state flow unit, which we call UNFO (Unspent Non-Fungible token Output).
 
-The NFT in the intermediate state within Bridge Core is marked as $nft_{BC}^{X,n}$ above, indicating that there is an NFT to be issued/locked in the corresponding chain $X$. 
 
-These intermediate states of NFT in Bridge Core are marked as UNFO (Unspent Non-Fungible Output). The idea stems from UTXO, when an UNFO is destroyed, it means that a new UNFO will be generated at the same time.
+To this end, we chose to introduce some intermediate parsing state for each NFT that crosses the Bridge Core chain, called UNFO (Unspent NFT Ouput), which will maintain a global ID on the Bridge Core and prove it by cross-chain circulation. Record the mapping relationship between the global ID and the NFT external local ID. UNFO is not necessarily responsible for the NFT's Ownership Management within Bridge Core, but can also be extended by a $lock\_script$, for example by pointing $lock\_script$ to a property inside Bridge Core. Management contract.
 
-### A. UNFO structure
+<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
 
-UNFO structure:
+
+
+### A. Component definition
+
+- *Issuing Smart Contract*, $iSC_N$: indicates the asset issuance contract on chain *N*;
+- *Backing Smart Contract*, $bSC_N$ : indicates an asset lockout contract on chain $N$;
+- *Verifying Smart Contract*, $vSC_N$ : Indicates the asset issuance contract/module responsible for verifying transactions on chain *N* on Bridge Core;
+- * Global identifier *, $ GID $, The global idendifier for the NFT in Darwinia Bridge Core
+-.. * Unspent Non-Fungible Output *, $ UNFO $, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka unspent NFT output of the idea stems from the UTXO, when a UNFO is destroyed, meaning it will produce a new UNFO.
+- *External Backing NFT*, $nft_B^{x,n}$, representing NFT identified as $n$ in contract $x$ on chain $B$
+- *Bridge Core Mirror for Backing NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$, or simply $nft_{BC}^{B, n}$ , cross-chain to Bridge The NFT of the intermediate state in the Core, and the $nft_B^{x,n}$ on the chain $B$ are mirror images of each other, indicating that there is an NFT to be issued/locked in the corresponding chain $B$. $unfo_ {gid}$ indicates the intermediate state UNFO of the NFT in Bridge Core.
+- *External Issueing NFT*, $nft_I^{x',n'}$, representing the NFT newly added on chain $I$ after the chain and identified as $n'$ in contract $x'$
+- *Bridge Core Mirror for Issuing NFT*, $nft_{BC(unfo_{gid})}^{I,x',n'}$, or simply $nft_{BC}^{I, n'}$ , cross Linked to the intermediate state NFT in Bridge Core, and mirrored with $nft_I^{x',n'}$ on chain $I$, indicating that one of the corresponding chain $I$ is about to be released/locked NFT. $unfo_{gid}$ indicates the intermediate state UNFO of the NFT in Bridge Core.
+- *Locking Transaction* , $T_{B}^{lock}$, the transaction that locks the NFT in $bSC_B$ on chain *B*
+- *Redeem Transaction* , $T_I^{redeem}$, the transaction that locks the NFT in $bSC_I$ on chain *I*
+- *Extrinsic Issue*, $EX_{issue}$ , the issue of the issue on Bridge Core 
+- *Extrinsic redeem*, $EX_{redeem}$ , redeem trading on Bridge Core 
+
+participants:
+
+- *validator*, maintains the participants of the Bridge Core;
+
+### B. UNFO implementation and role
+
+#### BI UNFO's data structure
 
 ```rust
 Struct UNFO {
@@ -94,11 +116,13 @@ Struct UNFO {
 - **phase**: Indicates the stage in which the UNFO is in the process of cross-chaining. such as:
   - 1: The NFT on the UNFO corresponding blockchain *chain_id* is locked/destroyed; the cross-chain process is in the intermediate state;
   - 2: The NFT on the UNFO corresponding blockchain *chain_id* is pending/issued; the cross-chain process is nearing completion / completed
-- **lock_script**: for more complex logic, fine-grained control scripts, maintaining UNFO's scalability
+- **lock_script**: For more complex logic, fine-grained control scripts, maintaining UNFO's scalability. Lock_script expresses the owner of this NFT. When the NFT is circulating within the Bridge Core, the lock_script may point to an ownership contract. When the NFT is locked in the backing contract, the lock_script may point to backing. Contract redeem contract
 
 
 
-### B. UNFO conversion
+#### B.II. UNFO conversion
+
+We chose to use the UNFO model as a storage/state flow unit. The UNFO model is a design idea similar to the UTXO model.
 
 When the destruction of one UNFO means the creation of another UNFO, if we trace the history of UNFO's destruction creation, we can trace back the entire cross-chain history of an NFT, which helps to achieve the NFT's recognizability to a certain extent;
 
@@ -120,38 +144,40 @@ When an UNFO is produced, it must be satisfied:
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
+#### B.III. UNFO-based NFT mapping and resolution services
+
+The pass-through parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the global status of the current pass in the relay chain on the *Issuing chain* or its connected relay chain, and normalizing it. In an analytical format, it provides a pass-through parsing query and certification service for a cross-chain network.
+
+During the transition of the NFT from the B chain to the I chain through the Bridge Core, the Bridge Core assigns a GID to each NFT and expresses the intermediate state and its transfer process as UNFO, including GID, (External Chain ID, External Contact Address). , External Token ID), lock_script and other information.
+
+These UNFO record sets are grouped into a record resolution table. This table can provide NFT certificate resolution services for the cross-chain protocol (eg redeem) and NFT resolution services for external systems.
+
+| UNFO | GID | Externl Chain ID | External Contact Address | External Token ID | Lock_Script |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| 1 | GID0001 | Ethereum | A_ERC721 | 12 | script_issuing_burn_or_relay | False |
+| 2 | GID0001 | Tron | B_TRC721 | ? | script_backing_redeem | True |
+| 3 | GID0002 | EOS | C_dGoods | 2.5.4 | script_issuing_burn_or_relay | False |
+| 4 | GID0002 | EOS | C_dGoods | 2.5.4 | script_ownership_contract | True |
+| 5 | GID0003 | Bridge Core | None | None | script_ownership_contract |
+| 6 | GID0004 | ETC | ETC_ERC721 | 23 | script_issuing_burn_or_relay | False |
+| 7 | GID0004 | Ethereum | D_ERC1155 | 13 | script_backing_redeem | False |
+
+GID0001: This NFT is cross-chain transfered from (Ethereum, A_ERC721, 12) to (Tron, B_TRC721, ?) trough Bridge Core, Currently it is active on Tron.
+
+GID0002: This NFT is cross-chain transfered from (EOS, C_dGoods, 2.5.4) to an account Bridge Core, the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+
+GID0003: This NFT is originally created on Bridge Core, it is recorded as UNFO because the golobal identifier is generated in the UNFO module, the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+
+GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ethereum, D_ERC1155, ?) trough Bridge Core, and then redeem reversely back. The 7th UNFO's External Local ID is unknow before redeem, but when redeeming, It will be updated to reveal it's value.
 
 
+<center>Figure: UNFO Set Table Sample</center>
+Remarks: 
 
+1. The External Token ID may be an unknown state, indicated by "?". This happens because the External Token ID generated on the target distribution chain will not be notified and fed back to Bridge Core during the issue. Without relevant transaction proof information, UNFO had to set the value to be unknown. However, when some new redemption transactions occur later, the redemption transaction sent by the initiator to Bridge Core may contain the GID and External Token ID. At this time, the original unknown Token ID value can be updated by this transaction certificate. Is a known value.
+2. In order to maintain good consistency, in the life cycle of the NTU through the cross-chain flow of the Bridge Core, it is desirable to keep the mapping relationship between the External Chain ID and the External Contact Address (External Contact Address, External Token ID) unchanged. Go to the parsing service and query the corresponding External Token ID in the historical UNFO record to maintain consistency.
 
-### C. Bridge Core Internal Structure
-
-
-
-<img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
-
-
-
-### D. Component definition
-
-- *Issuing Smart Contract*, $iSC_N$: indicates the asset issuance contract on chain *N*;
-- *Backing Smart Contract*, $bSC_N$ : indicates an asset lockout contract on chain $N$;
-- *Verifying Smart Contract*, $vSC_N$ : Indicates the asset issuance contract/module responsible for verifying transactions on chain *N* on Bridge Core;
-- *NFT identifier*, $nft_B^{x,n}$, representing the NFT identified as $n$ in the contract $x$ on the chain $B$
-  - *NFT identifier in Bridge Core*, $nft_{BC}^{B, n}$ , which means on Bridge Core, and mirrors $nft_B^{x,n}$ on chain $B$
-- *NFT identifier*, $nft_I^{x',n'}$, representing the NFT newly added on chain $I$ after the chain is identified as $n'$ in contract $x'$
-  - *NFT identifier in Bridge Core*, $nft_{BC}^{I, n'}$ , which means on Bridge Core, and $nft_I^{x',n'}$ on chain $I$ are mirror images of each other
-- *Locking Transaction* , $T_{B}^{lock}$, the transaction that locks the NFT in $bSC_B$ on chain *B*
-- *Redeem Transaction* , $T_I^{redeem}$, the transaction that locks the NFT in $bSC_I$ on chain *I*
-- *Extrinsic Issue*, $EX_{issue}$ , the issue of the issue on Bridge Core 
-- *Extrinsic redeem*, $EX_{redeem}$ , redeem trading on Bridge Core 
-- *Global NFT identifier*, $GID$
-
-participants:
-
-- *validator*, maintains the participants of the Bridge Core;
-
-### E. Preliminary implementation plan
+### C. Preliminary implementation plan
 
 The scenario is the same as described in Chapter II. Still need to implement three kinds of protocols: *Issue, Transfer, Redeem*. Also to simplify the model, the details of the fee will not be discussed here.
 
@@ -170,6 +196,8 @@ In $vSC_I$:
 
 (iii) *** issuance ***. *requester* Submit $EX_{issue}$ to chain $I$ , after the chain relay on chain $I$ is verified, a new NFT will be added to $iSC_I$: $nft_I^{x', n '}$, and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
 
+Note: For $iSC$ on the external blockchain, the global ID and local ID mappings need to be recorded on the external blockchain at the time of release, because this mapping is required when redeem is behind. To complete redeem.
+
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
@@ -184,7 +212,7 @@ In $vSC_I$:
 
 (ii) *** Unlock *** on Bridge Core. *redeemer* Submit $T_I^{redeem}$ to $vSC_I$ and verify it in the chain relay, it will be in $vSC_I$:
 
-- Record the correspondence between $GUID$ and $nft_I^{x', n'}$,
+- Record the correspondence between $GID$ and $nft_I^{x', n'}$,
 - Determine the destination public chain and trigger the corresponding $vSC_B$
 
 In $vSC_B$, 
@@ -197,7 +225,7 @@ The above process is triggered in an Extrinsic, which will generate an Extrinsic
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
-### F. Algorithms 
+### D. Algorithms 
 
 ##### Protocol: Issue
 
@@ -253,33 +281,27 @@ Explanation:
 
 ## IV. Cross-chain NFT Standards
 
-To easily mark an item or an asset, we mark it with a unique identifier, which has different identifiers. Let us take the example of the items in the physical space. In an ideal situation, all the items should be in the same time and space, so that everyone can observe and facilitate the distinction and identification. But the reality is that different items may exist in different time and space, and the observer may not be able to see every item. In the same situation, in the virtual asset world, because there are different books or blockchain networks (referred to as domains), different items can be easily distinguished and located in the same domain because they have different identifiers, but the domain is inside. The observer does not recognize and parse the item ID from the external domain.
+In a cross-chain environment, NFT will appear in different blockchain networks, and its available state may change constantly. Therefore, standards and solutions (such as Ethereum ERC20) in the original single-chain network cannot meet the cross-chain NFT standard. Need.
 
-At present, many of the existing standards of the pass standard are mainly designed for the identification of intra-domain assets, and the reuse of assets in different domains is not taken into account. As a result, when the non-homogeneous assets are multiplexed, the individual Token ID cannot be To identify a unique asset, you also need to bring a lot of domain information, which is very complicated to implement.
+The identification and resolution issues faced by cross-chain NFT standards require new solutions and standards to address them. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
 
-Cross-chain technology can greatly help the exchange to achieve interoperability in a wider blockchain network, but at the same time, it also brings some cognition and usage thresholds to developers and users, including the identifiability of the certificate. The problem.
+### A. Design Scope
 
-Because current pass standards, such as ERC20 or ERC721, only record ownership information on a particular chain, it is not considered that the pass may be distributed across two blockchain networks. When the pass is distributed across two blockchain networks, we need a set of identification and resolution systems to help the user and the pass application resolve and query the current pass status. When we give a NFT Token ID, we can't determine which blockchain network it is currently in, and who its owner is, because when the NFT cross-chain transfer, the pass is on one of the blockchain networks. It is active, while others are in an unavailable state, such as a locked state. In the absence of a pass-through resolution system, the out-of-chain operation cannot determine which chain the NFT is active on.
+- Globally unique identifier and external local identity specification
 
-In a cross-chain environment, Token's identification and resolution problems require new solutions and standards to solve. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
+  In order to standardize the different standard pass identifiers, to provide identification and analysis methods, coordinate and interface with existing standards, and meet the standard requirements of community infrastructure construction. The identification identifier is divided into a global unique identifier and an external local identifier.
 
+- NFT resolution system
 
+- NFT Ownership Management
 
-### A. Globally unique identifier
+- Inter-parachain NFT Transfers
 
-In order to standardize the different standard pass identifiers, to provide identification and analysis methods, coordinate and interface with existing standards, and meet the standard requirements of community infrastructure construction. (To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.) The cross-chain system will assign a global ID (global_id) to each cross-chain pass.
+  Cross-chain transfers between different parallel chains are facilitated by introducing an associated SPREE module.
 
-### B. Local pass analysis method
+### B. Standard plan
 
-The pass-through parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the global status of the current pass in the relay chain on the *Issuing chain* or its connected relay chain, and normalizing it. In an analytical format, it provides a pass-through parsing query and certification service for a cross-chain network.
-
-In UNFO, the chainId and token id of the native NFT are placed in the type and value before entering the Bridge Core. The lock indicates who the owner of the NFT is. When the NFT is circulating within the Bridge Core, The lock_script may point to an ownership contract. When the NFT is locked in the backing contract, the lock_script may point to the redeem contract of the backing contract.
-
-<img src="./images/nft_resolution.png" alt="NFT Resolution" style="zoom:200%;" />
-
-### C. Non-fungible Token Standards on Polkadot/Darwinia
-
-[WIP]
+Based on the design and solution basis of the cross-chain NFT protocol, we designed and proposed a standard proposal for cross-chain NFT, detailed design is placed in [RFC-0013 Cross-chain NFT Standards] (./0013-darwinia-cross-chain- Nft-standards.md).
 
 
 
