@@ -289,15 +289,15 @@ GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ether
 
 - 全局唯一标识和外部本地标识规范
 
-  为了将不同标准的通证标识符进行规范化，以提供识别和解析方法，与现有的标准进行很好的协调和对接，并满足社区基础设施建设的标准需求。（To harmonise existing practice in identifier assignment and resolution, to support resources in implementing community standards and to promote the creation of identifier services.) 跨链系统将为每一个跨链后的通证分配一个全局ID(global_id)，
+  为了将不同标准的通证标识符进行规范化，以提供识别和解析方法，与现有的标准进行很好的协调和对接，并满足社区基础设施建设的标准需求。识别标识分为全局唯一标识和外部本地标识。
 
 - NFT解析系统
 
-  [WIP]
-
 - NFT所有权管理
 
-  [WIP]
+- Inter-parachain NFT Transfers
+
+  通过引入一个关联的SPREE模块来帮助在不同的平行链之间进行跨链转账。
 
 ### B. 标准方案
 
