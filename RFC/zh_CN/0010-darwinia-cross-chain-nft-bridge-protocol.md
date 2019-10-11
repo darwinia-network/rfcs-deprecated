@@ -85,10 +85,10 @@ NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚�
 - *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
 - *Global identifier* ,  $GID$ , The global idendifier for the NFT in Darwinia Bridge Core
 - *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
-- *External NFT*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
-- *Bridge Core NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  或简称$nft_{BC}^{B, n}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像，表示在对应 chain $B$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
-- *External NFT*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
-- *Bridge Core NFT*,$nft_{BC(unfo_{gid})}^{I,x',n'}$, 或简称 $nft_{BC}^{I, n'}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像，表示在对应 chain $I$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
+- *External Backing NFT*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
+- *Bridge Core Mirror for Backing NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  或简称$nft_{BC}^{B, n}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像，表示在对应 chain $B$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
+- *External Issueing NFT*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
+- *Bridge Core Mirror for Issuing NFT*,$nft_{BC(unfo_{gid})}^{I,x',n'}$, 或简称 $nft_{BC}^{I, n'}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像，表示在对应 chain $I$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
 - *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
 - *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
 - *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易 
