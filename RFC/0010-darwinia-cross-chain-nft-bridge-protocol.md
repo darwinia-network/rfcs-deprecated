@@ -52,11 +52,11 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 There are two ideas for the NFT cross-chain solution to solve the above problems. One is based on the NFT extension based on the XClaim framework and retaining the bridge pledge mechanism. The Haberberg mechanism is introduced to solve the NFT pricing problem. For detailed solutions, see [RFC- 0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). But this solution still can't solve it well. Due to the large change in the price of the NFT, the problem of insufficient collateral is caused.
 
-Another idea is to introduce the chainRelay solution in the Backing Blockchain to protect the assets of the endorsement, so that the pledge mechanism is no longer needed, which is referred to as [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains] (./ 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain The NFT standard, and in the case of multi-chain cross-over, proposes a lower cost, functionally scalable cross-chain protocol.
+Another idea is to introduce the chainRelay solution in the Backing Blockchain to protect the assets of the endorsement, so that the pledge mechanism is no longer needed, which is referred to as [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./ 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md), the detailed introduction will not be described in detail in this article, this article will focus on this improved cross-chain transfer bridge solution, design a cross-chain The NFT standard, and in the case of multi-chain cross-over, proposes a lower cost, functionally scalable cross-chain protocol.
 
 
 
-Among them, in [RFC-0012] (./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) VA, we introduced the Darwinia Bridge Core model to optimize the blockchain network. The number of chainRelays in the topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
+Among them, in [RFC-0012](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) VA, we introduced the Darwinia Bridge Core model to optimize the blockchain network. The number of chainRelays in the topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg" alt="chain-relay-framework" style="zoom:80%;" />
 
@@ -208,7 +208,7 @@ Note: For $iSC$ on the external blockchain, the global ID and local ID mappings 
 
 #### Protocol: Redeem
 
-(i) ***Lock ***. *redeemer* locks the NFT asset $nft_I^{x', n'}$ on chain $I$ after $bSC_I$ (if there is a corresponding GID, declare $GID$ when locked) and declare the destination public The chain chain $B$ and its own address on the chain $B$; $bSC_I$ will atomically confirm the correctness of $GUID$ in $iSC_I$. This step will generate the transaction $T_I^{redeem}$. $lock\_I(nft\_id\_on\_I,\GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
+(i) ***Lock ***. *redeemer* locks the NFT asset $nft_I^{x', n'}$ on chain $I$ after $bSC_I$ (if there is a corresponding GID, declare $GID$ when locked) and declare the destination public The chain chain $B$ and its own address on the chain $B$; $bSC_I$ will atomically confirm the correctness of $GUID$ in $iSC_I$. This step will generate the transaction $T_I^{redeem}$. $lock\_I(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$ 
 
 (ii) *** Unlock *** on Bridge Core. *redeemer* Submit $T_I^{redeem}$ to $vSC_I$ and verify it in the chain relay, it will be in $vSC_I$:
 
@@ -273,11 +273,9 @@ Explanation:
 
 ###### *validator* Related Operations:
 
-- **burnTransform**($vSC_B,\GID,\nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* automatically triggers the method in $vSC_B$, which will be $nft_{ BC}^{I,n'}$ destroys both $nft_{BC}^{B,n}$, indicating the image of nft to be released on chain $B$. This operation will generate $EX_{redeem}$.
+- **burnTransform**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* automatically triggers the method in $vSC_B$, which will be $nft_{ BC}^{I,n'}$ destroys both $nft_{BC}^{B,n}$, indicating the image of nft to be released on chain $B$. This operation will generate $EX_{redeem}$.
 
-
-
-## 
+ 
 
 ## IV. Cross-chain NFT Standards
 
@@ -301,7 +299,7 @@ The identification and resolution issues faced by cross-chain NFT standards requ
 
 ### B. Standard plan
 
-Based on the design and solution basis of the cross-chain NFT protocol, we designed and proposed a standard proposal for cross-chain NFT, detailed design is placed in [RFC-0013 Cross-chain NFT Standards] (./0013-darwinia-cross-chain- Nft-standards.md).
+Based on the design and solution basis of the cross-chain NFT protocol, we designed and proposed a standard proposal for cross-chain NFT, detailed design is placed in [RFC-0013 Cross-chain NFT Standards](./0013-darwinia-cross-chain- Nft-standards.md).
 
 
 

@@ -20,7 +20,7 @@ Because current pass standards, such as ERC20 or ERC721, only record ownership i
 
 In a cross-chain environment, Token's identification and resolution problems require new solutions and standards to solve. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
 
-This article will further refine the NFT-related standards and design details based on [RFC-0010 Darwinia Cross-chain NFT Bridge Protocol] (./0010-darwinia-cross-chain-nft-bridge-protocol.md).
+This article will further refine the NFT-related standards and design details based on [RFC-0010 Darwinia Cross-chain NFT Bridge Protocol](./0010-darwinia-cross-chain-nft-bridge-protocol.md).
 
 
 
@@ -30,7 +30,7 @@ This article will further refine the NFT-related standards and design details ba
 
 - Recognizable. NFT in the cross-chain process should ensure that the NFT token id can be traced. Because the token ids of different blockchains are of different types, the contents and types of token ids may change during the process of NFT flowing between different blockchains; even the same NFT crosses from chain A to chain. B. After the chain A is returned to the chain A, the token id on the chain A may also change. The unidentifiable token id directly causes the asset value to be zero. Therefore, unlike the fungible token, maintaining the NFT's identifiability is an important part of the NFT cross-chain security.
 - Traceable. Because the token id is constantly changing during the NFT process, understanding the token id of the same NFT on different chains can greatly help to establish more complex logic in the application layer.
-- Visit friendly. In view of the need to interact with external wallet/RPC clients, reducing the cost of external access, improving efficiency and friendliness is also an important part of the NFT cross-chain. In [0010-darwinia-cross-chain-nft-bridge-protocol] (https://github.com/darwinia-network/rfcs/blob/master/RFC/en_US/0010-darwinia-cross-chain-nft-bridge -protocol.md) In the implementation, as more NFTs flow through the Bridge Core, more information is deposited in the Bridge Core. Therefore, the external wallet/RPC client only needs to request the Bridge Core once, and can obtain the local token id information of the NFT in all chains. Instead of requesting a separate request for each chain.
+- Visit friendly. In view of the need to interact with external wallet/RPC clients, reducing the cost of external access, improving efficiency and friendliness is also an important part of the NFT cross-chain. In [0010-darwinia-cross-chain-nft-bridge-protocol](https://github.com/darwinia-network/rfcs/blob/master/RFC/en_US/0010-darwinia-cross-chain-nft-bridge -protocol.md) In the implementation, as more NFTs flow through the Bridge Core, more information is deposited in the Bridge Core. Therefore, the external wallet/RPC client only needs to request the Bridge Core once, and can obtain the local token id information of the NFT in all chains. Instead of requesting a separate request for each chain.
 
 
 
@@ -46,7 +46,7 @@ This article will further refine the NFT-related standards and design details ba
 
 In view of the NFT cross-chain goal, the scheme will assign a unique global ID to the NFT when it is cross-chained, and retain its local token id on the external chain within the cross-chain bridge to achieve identifiability, traceability, and accessibility. aims.
 
-(For details on the implementation of the Cross-Bridge Bridge Core, see [0010-darwinia-cross-chain-nft-bridge-protocol] (https://github.com/darwinia-network/rfcs/blob/master/RFC/en_US/0010 -darwinia-cross-chain-nft-bridge-protocol.md))[1]
+(For details on the implementation of the Cross-Bridge Bridge Core, see [0010-darwinia-cross-chain-nft-bridge-protocol](https://github.com/darwinia-network/rfcs/blob/master/RFC/en_US/0010 -darwinia-cross-chain-nft-bridge-protocol.md))[1]
 
 In order to standardize the different standard pass identifiers, to provide identification and analysis methods, coordinate and interface with existing standards, and meet the standard requirements of community infrastructure construction. The cross-chain system will assign a global ID (global_id) to each cross-chain pass.
 
