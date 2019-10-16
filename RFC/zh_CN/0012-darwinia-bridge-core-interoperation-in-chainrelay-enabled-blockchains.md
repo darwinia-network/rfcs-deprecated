@@ -138,27 +138,48 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 本方案提供五个协议：Register, Issue, Transfer, Swap and Redeem.
 
+**Protocol: Register.** *bSC*需要在*iSC*中注册，*iSC*也需要在*bSC*中注册，这个相互注册过程需要公开可审计的，并通过注册完成之后的关闭外部(中心化的key的)注册权限的方式完成注册。Alice deploy an backing contract on B, and Dave deploy and issuing contract on I, and the backing contract and issuing contract require to register with each other.
 
+1. Deploy. First, Alice deploy the backing contract on B, and Dave deploy the issuing contract on I.
+2. Verify. Alice and Dave verify the counterparty's smart contracts.
+3. Register&Setup. Alice register Backing contract on I and associate with Issuing contract. Dave register Issuing contract on B and associate with backing contract.
+4. Finish. Backing and Issuing Contracts finish the permissionless register process. (Some permission closing TX may be required.)
 
-**Protocol: Register. ** *bSC*需要在*iSC*中注册，*iSC*也需要在*bSC*中注册，这个相互注册过程需要公开可审计的，并通过注册完成之后的关闭外部(中心化的key的)注册权限的方式完成注册。
+**Protocol: Issue.** Alice (*requester*) locks units of *b* with the *backing contract* on B to create *i(b)* on I:
 
-[WIP]
+1. Lock. Alice generates a new pulic/private key pare on *I* and locks funds *b* with the backing contract on B in a publicly verfiable manner. i.e., by send *b* to the lock contrated associated with backing contract. As part of locking these funds, Alice also specifies where the to-be-generated *i(b)* should be sent, i.e, Alice associates her public key on *I* with the transfer of *b* to the lock contract (linked to backing contract).
+2. Check Finalization. Alice (or her running client) check the the finalization vailid status of the lock transaction before she do the next step.
+3. Send Lock TX Proof. Alice send the lock transaction proof to *Issuing Contract* on *I* , the instrustion in the proof and transaction also include the issue instructions.
+4. Verify & Issue. After the issuing contract confirms via the TX proof and verify the validation that Alice has correctly locked her funds and forwards Alice's public key on I to iSC. The iSC verfies the proof, then issues and send i(b) to Alice, such that $||i(b)|| = b$
 
-**Protocol: Issue**
+**Protocol: Transfer.**Alice (*sender*) transfers *i(b)* to Dave (*receiver*) on I: 
 
-[WIP]
+1. *Transfer.* Alice notifies the iSC that she wishes to transfer her i(b) to Dave (public key) on I. The state of the iSC is updated and Dave becomes the new owner of i(b). 
+2. *Witness.* The backing contract witnesses the change of ownership on I through iSC, and no longer allows Alice to withdraw the associated amount of locked b on B. The process for any further transfers from Dave to other users is analogous. 
 
-**Protocol: Transfer**
+**Protocol: Swap**.Alice (sender) atomically swaps i(b) against Dave’s (receiver) i on I: 
 
-[WIP]
+1. *Lock.* Alice locks i(b) with the iSC. 
 
-**Protocol: Swap**
+2. *Swap.* If Dave locks the agreed upon units of i (or any 
 
-[WIP]
+   other asset on I) with the iSC within delay ∆swap, the iSC updates the balance of Dave, making him the new owner of i(b), and assigns Alice ownership over i. 
 
-**Protocol: Redeem**
+3. *Revoke.* If Dave does not correctly lock i with the iSC within ∆swap, the iSC releases locked i(b) to Alice. 
 
-[WIP]
+4. *Witness.* If the swap is successful, the backing contract witnesses the change of ownership of i(b) and no longer allows Alice to redeem the associated amount. 
+
+**Protocol: Redeem.**Dave (redeemer) burn i(b) with the iSC on I to receive b from the vault on B:
+
+1. Burn & Redeem. Dave creates a new public/private key pair on B. and locks *i(b)* with the *iSC* on I and requests the redemption of *i(b)*. There by, Dave also specifies his new public key on *B* as the target for the redeem.
+
+2. Check Finalization. Dave (or her running client) check the the finalization vailid status of the lock transaction before she do the next step.
+
+3. Send Burn TX Proof. Dave send the burn transaction proof to *bSC* on *B* , the instrustion in the proof and transaction also include the redeem instructions.
+
+4. Verify & Release.  After the backing contract confirms via the TX proof and verify the validation that Dave has correctly locked her funds and forwards Dave's public key on B to *bSC*. The *bSC* verfies the proof, then release funds *b* to Dave's specified public key on *B*, such that $b = ||i(b)||$
+
+   
 
 ![Solution Protocols](./images/xclaim_new_protocol_overview.png)
 
@@ -216,7 +237,7 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 
 FlyClient[6]介绍了一种新的交易验证的轻客户端方案，可以支持多种区块链网络，包括POW区块链和POS区块链。
 
-目前阶段，主要SPV客户端和BTCRelay方案的是，因为需要存储每一个区块头，导致其算法需要的存储和带宽要求是线性增长的。Fly Client通过组合 Merkle Moutain Range(MMR)[2]，最佳概率块抽样(Optimal probabilistic block sampling)等技术，可以实现算法性能达到对数级，也就是在每次执行校验期间只需要下载对数个区块头。
+目前阶段，主要SPV客户端和BTCRelay方案的是，因为需要存储每一个区块头，导致其算法需要的存储和带宽要求是线性增长的。Fly Client通过组合 Merkle Moutain Range(MMR)[2]，最佳概率块抽样(Optimal probabilistic block sampling)，Fiat–Shamir heuristic等技术，可以实现算法性能达到对数级，也就是在每次执行校验期间只需要下载对数个区块头。
 
 详细设计可参考[FlyClient: Super-Light Clients for Cryptocurrencies](https://eprint.iacr.org/2019/226)
 
@@ -235,3 +256,6 @@ FlyClient[6]介绍了一种新的交易验证的轻客户端方案，可以支�
 5. XClaim, https://eprint.iacr.org/2018/643.pdf
 6. FlyClient, https://eprint.iacr.org/2019/226
 7. https://zhuanlan.zhihu.com/p/72620891
+8. https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2016-May/012715.html
+9. [Fiat Shamir heuristic](https://en.wikipedia.org/wiki/Fiat–Shamir_heuristic)
+10. https://medium.com/blockchain-research-newsletter/blockchain-research-newsletter-3-nipopow-and-flyclient-ac202f7624a7
