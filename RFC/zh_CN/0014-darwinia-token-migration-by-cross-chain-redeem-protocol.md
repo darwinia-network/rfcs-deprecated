@@ -35,16 +35,39 @@ RING和KTON的ERC20 Token信息:
 ### B. 术语
 
 - **Genesis**， 创世块或表示区块链网络创世状态的账本数据。
-- **CBA**, 全称Cryptocurrency Back Asset, 即有加密资产背书的资产，详细介绍可以参考XClaim [1].
+- **CBA**, 全称Cryptocurrency Backed Assets, 即有加密资产背书的资产，详细介绍可以参考XClaim [1].
 - **Chain Relay**,  Cross-Chain State Verification. It is capable of interpreting the statte of the backing blockchain B and provide functionality comparable to an SPV or light client. 主要用于验证外部区块链网络的交易存在性证明和共识证明。
 - **Backing Contract/Module**，Backing Blockchain中用于管理背书资产的合约或者模块，包括锁定和释放等功能，在Darwinia网络中Backing Module还负责管理锁定在创世块中的背书资产。
 - **Chain Relay Module**, 实现在Darwinia上的针对外部区块链网络(例如Ethereum/ Tron)的Chain Relay.
 - **External Darwinia Chain Relay**，存在于外部区块链网络上的针对Darwinia Network的Chain Relay.
 - **External Issuing Contract**, 用于在外部区块链网络中发行原生RING/KTON CBA的ERC-20 Token.
 
+### C. 背书资产Genesis配置
+
+在Darwinia主网上线之时，就存在CBA背书资产，因此需要将RING/KTON在其他链上的资产背书信息定义在Genesis Config中，当主网上线之后，这些背书资产将会初始化相应原生资产，并将其锁定在背书合约中，供特殊赎回(迁移)协议使用。
+
+需要注意的是，Genesis Config总分发和锁定的RING/KTON，将对应于主网上线时对应公链上RING/KTON的Total Supply. 
+
+Genesis Config 片段示例:
+
+```json
+{
+  "backingAssets": {
+    "Ethereum" : {
+      "RING" : 100000,
+      "KTON" : 50000
+    },
+    "Tron" : {
+      "RING" : 3000,
+      "KTON" : 200
+    }
+  }
+}
+```
 
 
-### C. 通过特殊赎回协议实现RING/KTON迁移
+
+### D. 通过特殊赎回协议实现RING/KTON迁移
 
 当用户需要将ERC-20形式的RING通证转化成Darwinia主网上的RING的时候，其只需要将该部分RING发送一个Token销毁合约，在确认销毁成功之后，用户将该笔交易证明发送给Darwinia网路的解锁合约，解锁合约在验证完成之后，将会从背书资产模块中释放对应的RING通证给赎回者。
 
@@ -52,38 +75,33 @@ RING和KTON的ERC20 Token信息:
 
 #### I. 与普通赎回协议的区别
 
-[WIP]
+RING/KTON特殊赎回协议跟Darwinia Bridge Core中的普通赎回协议最大的区别在于背书资产(Backing Assets)。普通赎回协议中需要赎回的背书资产，都是之前通过发行协议锁定在Backing Contract里面的，但是在RING/KTON特殊赎回协议这里并没有先前的锁定发行CBA的过程，主网上线前的ERC20 RING对应的Backing Assets是通过创始块背书，进行分发和锁定。
 
-#### II. Chain Relay模块
+创始块中锁定的原生资产用于支持原本已经在其他公链(Ethereum和Tron)上已经存在的ERC20形式的RING/KTON赎回功能。当用户需要拿回Darwinia主链上的原生背书资产时，他们只需要按照特殊赎回协议销毁背书资产对应的RING/KTON CBA Token就可以了。
 
-[WIP]
+#### II. Chain Relay SRML模块
 
-### D. 背书资产Genesis配置
+Chain Relay是实现Token跨链转接桥的关键模块，类似于一个支持SPV的轻客户端。在像以太坊这样的智能合约公链中，Chain Relay是用智能合约来实现的，例如[BTCRelay](https://github.com/ethereum/btcrelay)。对于Darwinia来说，因为是基于Substrate开发，支持SRML模块和链上升级，所以就多了一个选择，可以将Chain Relay的实现为Darwinia的一个SRML，并针对不同的公链实现不同的SRML形式的Chain Relay，以提供相应公链的跨链支持。
 
-在Darwinia主网上线之时，就存在CBA背书资产，因此需要将RING/KTON在其他链上的资产背书信息定义在Genesis Config中，当主网上线之后，这些背书资产将会初始化相应原生资产，并将其锁定在背书合约中，供特殊赎回(迁移)协议使用。
+对于具体的实现，性能和成本是非常重要的考量，因此需要基于一些改进方案来帮助实现，相关改进方案在RFC-0012 VI章节详细描述。
 
+#### III. Gringotts合约的暂停和迁移
 
+Gringotts合约功能中存RING得KTON的功能对应于Darwinia Staking 模块中的承诺锁定得KTON的功能，Darwinia主网上线后，这部分功能将从以太坊(或波场)Gringotts智能合约迁移至Darwinia主网。
 
-Genesis Congig 片段示例:
+为了保证主网上线时和之后，其他公链上不会有新的KTON被通过定期存RING发行出来，因此，主网上线前Gringott合约功能将停止存RING得KTON功能，但是RING取回功能仍将保留。
 
-```json
-{
-  "backingAssets": [
-    "Ethereum" : {
-      "RING" : 100000,
-      "KTON" : 50000,
-    },
-    "Tron" : {
-      "RING" : 3000,
-      "KTON" : 200,
-    }
-  ]
-}
-```
+通过这种方式，Gringotts中的存单可以不用考虑迁移至Darwinia主网，只需等待存单到期，并将其中的ERC20形式RING取回，并通过特殊赎回协议转移到Darwinia主网就可以。
 
 
+
+Gringotts合约实现:
+
+https://github.com/evolutionlandorg/bank
 
 ### E. 跨链转账的普通发行和普通赎回协议
+
+对于Darwinia 来说，不仅仅存在主网上线后的Token迁移需求，还存在将主网上原生的RING/KTON资产跨链到其他公链的需求。因此以太坊上的ERC-20 RING不仅可以通过迁移协议单向回到Darwinia，也可以继续保留在以太坊上面，而且Darwinia上的RING还可以通过跨链转接桥作为CBA发行到以太坊上面成为ERC-20 RING，这个过程将由普通发行和赎回协议完成，其协议流程和设计跟正常的Token跨链协议一样，没有太大区别。
 
 
 
