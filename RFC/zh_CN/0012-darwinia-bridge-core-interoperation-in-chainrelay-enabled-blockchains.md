@@ -158,8 +158,6 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 ![Solution Protocols](./images/xclaim_new_protocol_overview.png)
 
-Fig High-level overview of the Register, Issue, Swap and Redeem Protocol.
-
 ### B. Issue Contract 
 
 由于有了Backing Contract，并消除了只需要质押资产的部分，因为相较于原先XClaim的方案，新的Issuing Contract得到了很大的简化。
@@ -222,3 +220,4 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 2. https://github.com/mimblewimble/grin/blob/master/doc/mmr.md
 3. https://github.com/ipfs/specs/tree/master/merkledag
 4. https://hackernoon.com/ipfs-and-merkle-forest-a6b7f15f3537
+5. https://eprint.iacr.org/2018/643.pdf
