@@ -12,11 +12,15 @@ desc: Darwinia Bridge Core - Interoperation in ChainRelay Enabled Blockchains
 
 ## I. Abstract
 
-XClaim (Cross Claim) 针对 ACCS 的缺点，提出了通用的、高效低成本的跨链框架，使用了Cryptocurrency-Bakced Assets (CBAs). 
+XClaim[5] 针对 ACCS 的缺点，设计了通用的、高效低成本的跨链框架，并提出了Cryptocurrency-Bakced Assets (CBAs)的概念。其设计主要分成三个部分：
 
-XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身的局限性：只针对Fungible Token有效，并且。目前针对NFT的跨链流通还没有通用框架。并且XClaim方案中Vault的抵押物设计还可能存在收益率不足的问题。
+- 提出的CBA概念对跨链资产和原生资产的关系做了清晰的概括，是原生资产在另外一个区块链网络中存在形式的精简表达。
+- 在发行链(Issuing Blockchain)一端，通过借助Chain Relay对另外一个链上的交易证明进行存在性和共识性的直接验证，而无需信任第三方。
+- 在背书链(Backing Blockchain)一端，通过引入Vault、质押物(Collateral)和喂价等经济机制，对赎回过程的安全性实现了理性经济假设下的保证。由于存在质押物和喂价机制的约束，所以只能支持流动性较好的Fungible Token。
 
-本文将介绍如何通过在Backing Blockchain上引入chainRelay的方案，去除Vault角色及其抵押物。
+XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身的局限性：只针对Fungible Token有效，不支持NFT和其他流动性较差无法喂价和平仓的Fungible Token。此外，XClaim方案中因为Vault的质押物在跨链资产赎回之前都是锁定的，导致存在较高的质押成本，抵押物可能存在收益率不足的问题。
+
+针对XClaim的以上问题，本文在保留CBA概念和大部分发行链的设计的同时，将背书链一端进行重新设计，增加对Backing Blockchain引入更多合理假设，即支持智能合约和Chain Relay(非BTC)，在背书链一端引入Chain Relay来验证发行链的交易，同时对背书锁定资产的赎回进行链上合约化的约束。通过这样的新方式，去除Vault、流动性质押、喂价等设计和模块，实现了对更广泛的Token的支持，包括NFT和流动性不好的Fungible Token。
 
 
 
@@ -140,19 +144,19 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 [WIP]
 
-**Protocol: Issue. **
+**Protocol: Issue**
 
 [WIP]
 
-**Protocol: Transfer. **
+**Protocol: Transfer**
 
 [WIP]
 
-**Protocol: Swap. **
+**Protocol: Swap**
 
 [WIP]
 
-**Protocol: Redeem. **
+**Protocol: Redeem**
 
 [WIP]
 
@@ -196,19 +200,27 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 
 ## VI. Chain Relay Maintenance Cost and Improments
 
-将Backing Blockchain中的Collateral Vault模型改成chain relay方案除了需要Backing Blockchain的智能合约支持，还有一个缺点和需要考虑的地方，就是维护chain relay的成本，尤其是像以太坊这样的燃料费比较贵的区块链网络。
+与XClaim方案相比，最终的区别是在Backing Blockchain中引入了Chain Relay和智能合约，用于验证交易存在证明和共识证明。这个方案最大的一个挑战就是就是如何降低维护chain relay的成本，尤其是像以太坊这样的燃料费比较贵的区块链网络。
+
+为了验证交易，像Bitcoin和以太坊需要节点来验证一条链是有效的，其中牵涉到下载并并验证区块的有效性，可能会花费服务器数小时的时间和很多的带宽和存储，不用说链上的合约，即使是像普通的移动端这样仅有有限资源的客户端都无法支持。因此像Bitcoin和以太坊这样的大部分公链提供了轻客户端，也就是SPV(Simplified payment verification)客户端，可以只需要下载区块头就可以进行交易验证。但是即使如此，简单的SPV客户端仍需要下载很多的区块头数据，面对智能合约高昂的燃料费来说，实现起来仍然不切实际。
+
+因此，本章节将注重于对不同的Chain Relay实现进行评估和分析，以求找到链上成本最低的方案。
 
 ### A. Cost Estimation
 
-[WIP]
+根据FlyClient[6]的描述，至2019年7月，一个以太坊的SPV客户端需要下载并存储4G的数据，如果采取类似的结构和设计，一个链上Chain Relay所需要下载并存储存储的数据也基本线性相关。
 
-### B. Improments using Merkle Mountain Ranges
+另一个可以评估的方案是[BTCRelay]([http://btcrelay.org](http://btcrelay.org/))的成本。[WIP]
 
+### B. Improvements using FlyClient[6]
 
+FlyClient[6]介绍了一种新的交易验证的轻客户端方案，可以支持多种区块链网络，包括POW区块链和POS区块链。
 
-[WIP, Merkle Mountain Range]
+目前阶段，主要SPV客户端和BTCRelay方案的是，因为需要存储每一个区块头，导致其算法需要的存储和带宽要求是线性增长的。Fly Client通过组合 Merkle Moutain Range(MMR)[2]，最佳概率块抽样(Optimal probabilistic block sampling)等技术，可以实现算法性能达到对数级，也就是在每次执行校验期间只需要下载对数个区块头。
 
-### C. Improments using Zero-knowlege Proofs
+详细设计可参考[FlyClient: Super-Light Clients for Cryptocurrencies](https://eprint.iacr.org/2019/226)
+
+### C. Improvements using Zero-knowlege Proofs
 
 [WIP]
 
@@ -220,4 +232,6 @@ Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能�
 2. https://github.com/mimblewimble/grin/blob/master/doc/mmr.md
 3. https://github.com/ipfs/specs/tree/master/merkledag
 4. https://hackernoon.com/ipfs-and-merkle-forest-a6b7f15f3537
-5. https://eprint.iacr.org/2018/643.pdf
+5. XClaim, https://eprint.iacr.org/2018/643.pdf
+6. FlyClient, https://eprint.iacr.org/2019/226
+7. https://zhuanlan.zhihu.com/p/72620891
