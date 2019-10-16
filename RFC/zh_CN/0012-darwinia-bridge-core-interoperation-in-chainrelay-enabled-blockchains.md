@@ -111,9 +111,9 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 1. Support General Tokens
    - Workable for NFT
-   - Workable for Fungible Tokens without liquidations on ourside exchanges.
+   - Workable for Fungible Tokens without liquidations on outside exchanges.
 2. Economic Feasible
-   - Backing contract does not require to provide a lot of collaterals for the safety of redeem protocol
+   - Backing contract does not require to provide a lot of collateral for the safety of redeem protocol
    - Feasible solutions for to support running low cost chain relay on backing blockchain.
 3. Securty Properties(Ignore, refer the section in XClaim paper):
    - Audiability
@@ -141,16 +141,16 @@ XClaim 给出了对 *chain relay* [7]的定义：
 **Protocol: Register.** *bSC*需要在*iSC*中注册，*iSC*也需要在*bSC*中注册，这个相互注册过程需要公开可审计的，并通过注册完成之后的关闭外部(中心化的key的)注册权限的方式完成注册。Alice deploy an backing contract on B, and Dave deploy and issuing contract on I, and the backing contract and issuing contract require to register with each other.
 
 1. Deploy. First, Alice deploy the backing contract on B, and Dave deploy the issuing contract on I.
-2. Verify. Alice and Dave verify the counterparty's smart contracts.
+2. Verify. Alice and Dave verify the counterpart's smart contracts.
 3. Register&Setup. Alice register Backing contract on I and associate with Issuing contract. Dave register Issuing contract on B and associate with backing contract.
-4. Finish. Backing and Issuing Contracts finish the permissionless register process. (Some permission closing TX may be required.)
+4. Finish. Backing and Issuing Contracts finish the permission-less register process. (Some permission closing TX may be required.)
 
 **Protocol: Issue.** Alice (*requester*) locks units of *b* with the *backing contract* on B to create *i(b)* on I:
 
-1. Lock. Alice generates a new pulic/private key pare on *I* and locks funds *b* with the backing contract on B in a publicly verfiable manner. i.e., by send *b* to the lock contrated associated with backing contract. As part of locking these funds, Alice also specifies where the to-be-generated *i(b)* should be sent, i.e, Alice associates her public key on *I* with the transfer of *b* to the lock contract (linked to backing contract).
+1. Lock. Alice generates a new pulic/private key pare on *I* and locks funds *b* with the backing contract on B in a publicly verifiable manner. i.e., by send *b* to the lock contract associated with backing contract. As part of locking these funds, Alice also specifies where the to-be-generated *i(b)* should be sent, i.e, Alice associates her public key on *I* with the transfer of *b* to the lock contract (linked to backing contract).
 2. Check Finalization. Alice (or her running client) check the the finalization vailid status of the lock transaction before she do the next step.
-3. Send Lock TX Proof. Alice send the lock transaction proof to *Issuing Contract* on *I* , the instrustion in the proof and transaction also include the issue instructions.
-4. Verify & Issue. After the issuing contract confirms via the TX proof and verify the validation that Alice has correctly locked her funds and forwards Alice's public key on I to iSC. The iSC verfies the proof, then issues and send i(b) to Alice, such that $||i(b)|| = b$
+3. Send Lock TX Proof. Alice send the lock transaction proof to *Issuing Contract* on *I* , the instruction in the proof and transaction also include the issue instructions.
+4. Verify & Issue. After the issuing contract confirms via the TX proof and verify the validation that Alice has correctly locked her funds and forwards Alice's public key on I to iSC. The iSC verifies the proof, then issues and send i(b) to Alice, such that $||i(b)|| = ||b||$
 
 **Protocol: Transfer.**Alice (*sender*) transfers *i(b)* to Dave (*receiver*) on I: 
 
@@ -161,9 +161,7 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 1. *Lock.* Alice locks i(b) with the iSC. 
 
-2. *Swap.* If Dave locks the agreed upon units of i (or any 
-
-   other asset on I) with the iSC within delay ∆swap, the iSC updates the balance of Dave, making him the new owner of i(b), and assigns Alice ownership over i. 
+2. *Swap.* If Dave locks the agreed upon units of i (or any other asset on I) with the iSC within delay ∆swap, the iSC updates the balance of Dave, making him the new owner of i(b), and assigns Alice ownership over i. 
 
 3. *Revoke.* If Dave does not correctly lock i with the iSC within ∆swap, the iSC releases locked i(b) to Alice. 
 
@@ -173,11 +171,11 @@ XClaim 给出了对 *chain relay* [7]的定义：
 
 1. Burn & Redeem. Dave creates a new public/private key pair on B. and locks *i(b)* with the *iSC* on I and requests the redemption of *i(b)*. There by, Dave also specifies his new public key on *B* as the target for the redeem.
 
-2. Check Finalization. Dave (or her running client) check the the finalization vailid status of the lock transaction before she do the next step.
+2. Check Finalization. Dave (or her running client) check the the finalization valid status of the lock transaction before she do the next step.
 
-3. Send Burn TX Proof. Dave send the burn transaction proof to *bSC* on *B* , the instrustion in the proof and transaction also include the redeem instructions.
+3. Send Burn TX Proof. Dave send the burn transaction proof to *bSC* on *B* , the instruction in the proof and transaction also include the redeem instructions.
 
-4. Verify & Release.  After the backing contract confirms via the TX proof and verify the validation that Dave has correctly locked her funds and forwards Dave's public key on B to *bSC*. The *bSC* verfies the proof, then release funds *b* to Dave's specified public key on *B*, such that $b = ||i(b)||$
+4. Verify & Release.  After the backing contract confirms via the TX proof and verify the validation that Dave has correctly locked her funds and forwards Dave's public key on B to *bSC*. The *bSC* verifies the proof, then release funds *b* to Dave's specified public key on *B*, such that $||b|| = ||i(b)||$
 
    
 
@@ -241,7 +239,7 @@ FlyClient[6]介绍了一种新的交易验证的轻客户端方案，可以支�
 
 详细设计可参考[FlyClient: Super-Light Clients for Cryptocurrencies](https://eprint.iacr.org/2019/226)
 
-### C. Improvements using Zero-knowlege Proofs
+### C. Improvements using Zero-knowledge Proofs
 
 [WIP]
 
