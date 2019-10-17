@@ -1,0 +1,3 @@
+files:
+  - source: /RFC/zh_CN/*.md
+    translation: /RFC/%language%/%original_file_name%
