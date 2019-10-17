@@ -14,7 +14,7 @@ desc: Cross-chain NFT Bridge Protocol
 
 ## I. Over view
 
-The Xclaim-based framework provides an idea for token cross-chain, but there are still many problems with Nft, including the Vault collateral design on the Backing Blockchain. This problem can be effectively solved by introducing a chain-Relay contract on the Backing Blockchain. This paper will design a cross-chain Nft solution and standard based on this improved cross-chain bridge solution.
+The Xclaim-based framework provides an idea for token cross-chain, but there are still many problems with NFT, including the Vault collateral design on the Backing Blockchain. This problem can be effectively solved by introducing a chain-Relay contract on the Backing Blockchain. This paper will design a cross-chain Nft solution and standard based on this improved cross-chain bridge solution.
 
 **Keywords**：Blockchain, NFT, cross chain, multi-chain
 
@@ -52,22 +52,22 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 There are two NFT cross-chain solutions to the above problems. One is based on the NFT extension of the XClaim framework and retaining the bridge pledge mechanism. By introducing the Harberger mechanism to solve the NFT pricing problem, a detailed solution can be found:[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). However, this solution still cannot solve the problem of insufficient pledge due to the price change of NFT.
 
-另一个思路是通过在Backing Blockchain引入chainRelay的方案，对背书的资产做更多的保护，使得不再需要质押机制，简称为[RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md)，详细的介绍将不在本文进行详细介绍，本文将着重基于这个改进的跨链转接桥方案，设计一个跨链的NFT标准，并且在多链互跨的情况下，提出了更低成本、功能具备扩展性的跨链协议。
+Another idea is to introduce ChainRelay into the Backing Blockchain to offer more protection for the backing assets so that the pledge mechanism is no longer needed. It is called: [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md). Detailed introduction will not be described in detail here, and instead this article will focus on designing a cross-chain NFT standard based on this improved cross-chain bridge solution, and proposing a lower cost high extensible function cross-chain protocol for the case of mutual cross among multiple blockchains.
 
 
 
-其中，在[RFC-0012](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) V.A中，我们引入了Darwinia Bridge Core的模型，用来优化区块链网络拓扑中的chainRelay数量。本文将基于Darwinia Bridge Hub，并针对NFT特定领域的问题，进行细化设计。
+In [RFC-0012](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md) V.A, we introduced the model of Darwinia Bridge Core to optimize the number of chainRelays in the blockchain network topology. This article will be based on the Darwinia Bridge Hub and will be refined for NFT-specific issues.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg" alt="chain-relay-framework" style="zoom:80%;" />
 
 ## III. NFT in Darwinia Bridge Core
 
-NFT跨链操作的难点在于，不同的公链有着自己的NFT标准，甚至不同公链上的NFT的token id连长度都是不相等的，NFT在跨到不同公链时，必然会经历token id的转换。如何在跨链的过程中不丢失NFT的可识别性，是一个值得研究的命题。
+The difficulty of NFT cross-chain operation is that different public chains have their own NFT standards, and even the NFT token ids on different public chains are not equal in length. When NFT crosses different public chains, it will inevitably experience token id. conversion. How to avoid the identifiability of NFT in the process of cross-chain is a proposition worth studying.
 
-在设计Bridge Core内的NFT流转逻辑时，我们想解决以下三个问题：
+When designing NFT flow logic in Bridge Core, we want to solve the following three problems:
 
-- 保留NFT的跨链流转路径/历史，不损失NFT的可识别性；
-- 计算和验证解耦，拥有更高的处理速度；
+- Preserving the cross-chain flow path/history of the NFT without losing the identifiability of the NFT;
+- Calculate and verify decoupling with higher processing speed;
 - 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
 
 
