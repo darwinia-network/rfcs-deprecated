@@ -46,9 +46,9 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 - The irreplaceability of NFT. Because of the identifiability and irreplaceability of NFT, it is impossible for $vault$ to mortgage NFT $nft_b$ on chain $B$ on chain $I$.
 - The value of NFT is difficult to assess. In XClaim, determining whether the $vault$ collateral is full/overdated is achieved through Oracle $O$. So is also a potential assumption that token $b$ and token $i$ can be evaluated correctly. Based on the current prosperous centralization and decentralized exchanges, this potential assumption can be basically met in the case of providing good liquidity. However, the market of the NFT exchange is not yet mature, and even the centralized exchange cannot truly reflect the market's price judgment on the NFT. How NFT pricing itself is a problem.
-- NFT定价不具有连续性和可预测性。即使某个NFT在市场上有了一次成交记录，即有了一个价格，因为NFT被售出的频次远低于FT，即使在市场流动性非常好的情况下，该NFT下一次的成交价格既不连续，也不可预测。
+- NFT pricing is not continuous or predictable. Even if a NFT has a transaction record in the market with a certain price, since the frequency of NFT sold is far less than FT, though market has sufficient liquidity, the next transaction price of the NFT is Not continuous or predictable.
 
-### C. 解决方案和思路
+### C. Solution Description
 
 解决以上问题的NFT跨链方案有两种思路，一种是基于基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). 但这个方案仍然无法很好的解决由于NFT价格变化太大，导致的质押物不足问题。
 
