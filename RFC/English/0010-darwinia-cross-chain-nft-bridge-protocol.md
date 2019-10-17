@@ -68,19 +68,19 @@ When designing NFT flow logic in Bridge Core, we want to solve the following thr
 
 - Preserving the cross-chain flow path/history of the NFT without losing the identifiability of the NFT;
 - Calculate and verify decoupling with higher processing speed;
-- 实现额外功能，例如NFT在跨链的同时完成分解、合并等操作；
+- Implement additional functions, such as to complete NFT decomposition, merge, etc. while cross-chaining;
 
 
 
-为此，我们选择为每个经过Bridge Core跨链的NFT引入一些中间解析状态，称为UNFO (Unspent NFT Ouput)，这些UNFO状态将维护一个Bridge Core上全局的ID，并借由跨链流通证明记录全局ID和NFT外部本地ID的映射关系。UNFO并不一定具体负责该NFT在Bridge Core范围内的所有权管理(Ownership Management)，但也可以借由一个$lock\_script$进行扩展，例如通过将$lock\_script$指向Bridge Core内部的一个所有权管理合约。
+To this end, we chose to introduce some midway parsing state for each NFT that crosses the Bridge Core chain, called UNFO (Unspent NFT Ouput), which will maintain a global ID on the Bridge Core and prove the mapping relationship between the global ID and the NFT external local ID by cross-chain circulation history. UNFO is not necessarily responsible for the NFT's Ownership Management within Bridge Core, but can also be extended by a $lock\_script$, for example by pointing $lock\_script$ to a property management contract. inside Bridge Core.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8qjwd9j30fe0gh3zg.jpg" alt="0010-framework-of-bridge-core" style="zoom:50%;" />
 
 
 
-### A. 组件定义
+### A. Component definition
 
-- *Issuing Smart Contract*,  $iSC_N$:  表示在 chain *N* 上的资产发行合约；
+- *Issuing Smart Contract*,  $iSC_N$:  means the asset issuing smart contract on chain *N*；
 - *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
 - *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
 - *Global identifier* ,  $GID$ , The global idendifier for the NFT in Darwinia Bridge Core
