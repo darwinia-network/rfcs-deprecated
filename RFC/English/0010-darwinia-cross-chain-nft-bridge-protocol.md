@@ -14,38 +14,38 @@ desc: Cross-chain NFT Bridge Protocol
 
 ## I. Over view
 
-基于XClaim的框架给通证跨链提供了一个思路，但是对于NFT仍有很多问题，其中主要包括Backing Blockchain上 Vault抵押物设计的问题。通过在Backing Blockchain上引入chain-Relay合约可以有效的解决这个问题，本文将基于这个改进的跨链转接桥方案，设计跨链NFT的方案和标准。
+The Xclaim-based framework provides an idea for token cross-chain, but there are still many problems with Nft, including the Vault collateral design on the Backing Blockchain. This problem can be effectively solved by introducing a chain-Relay contract on the Backing Blockchain. This paper will design a cross-chain Nft solution and standard based on this improved cross-chain bridge solution.
 
-**关键词**：Blockchain, NFT, cross chain, multi-chain
+**Keywords**：Blockchain, NFT, cross chain, multi-chain
 
 
 
-## II. 背景
+## II. Background
 
-### A. 研究历史
+### A. Research History
 
-比特币[1]的出现，允许每个人只要拥有私钥，就可以不依赖任何信任地操作自己的资产。整个比特币系统，由一系列记录着自己前序区块hash的区块构成，共同维护着同一份去中心化的全球“账本”。
+The emergence of Bitcoin [1] allows everyone to operate their own assets trustless, as long as they have a private key. The entire Bitcoin system consists of a series of blocks that record their pre-order block hashes, maintaining the same decentralized global “ledger”.
 
-比特币的出现之后，紧接着的就是区块链的飞速发展，出现了支持智能合约的公链——以太坊[2]，PoS的公链——EOS[3]等。这些公链的爆发，带来了整个token交易市场的繁荣。
+After Bitcoin, with the rapid development of the blockchain, smart contracts are supported by the public chains - Ethereum [2], the public chain of PoS - EOS [3]. The outbreak of these public chains has brought prosperity to the entire token trading market.
 
-主流的token交易/交换方式仍然是中心化交易所，用户的token由中心化交易所代为管理。信任和维护成本很高，并且还需要面临源源不断的黑客攻击的威胁。
+The mainstream token trading/exchange method is still via a centralized exchange, and the user's token is managed by exchange as well. Trust and maintenance costs are high and there is a constant threat of hacking.
 
-为了克服中心化交易所的弊端，去中心化交易所 (DEX) 开始涌现。绝大部分去中心化交易所只支持在一条链上进行链内的token交易/转换，比如以太坊上的ERC20[4], ERC721 token[5]. 这一定程度上实现了去中心化，降低了信任成本（从相信机构变成了相信代码），但是使用场景十分有限，并且还要受限于公链的tps和交易费用。
+In order to overcome the drawbacks of centralized exchanges, decentralized exchanges (DEX) began to emerge. Most DEX only support token trading/conversion on a single public chain, such as ERC20[4], ERC721 token[5] on Ethereum. This did achieve decentralization with a limited extent, and reduced the cost of trust (from believing in the organization to believing code); yet the usage scenario is also limited by the Tps and transaction costs of the public chain.
 
-当然也有一部分的去中心化交易所实现了ACCS，允许token跨链交换。它们使用了hashed timelock contracts (HTLCs)[6].  HTLCs的优点同它的缺点一样，都很明显。HTLCs可以在不需要信任的情况下实现跨链token的原子交换，这既实现了去中心化，又拓展了单条链上的DEX的功能。它的缺点就是成本太高，并且限制条件很多：(i) 所有参与方都必须保持全过程在线  (ii) 对粉尘交易失效  (iii) 通常锁定时间较长。这样的token跨链交换既昂贵又低效。在实际使用中，HTLCs的使用范例也非常少。
+There are also some decentralized exchanges implemented ACCS, allowing tokens to be cross-chain exchanged. They use the hashed timelock contracts (HTLCs) [6].  HTLCs can achieve atomic exchange of cross-chain tokens trust free, which both decentralizes and extends the functionality of DEX on a single chain. Its disadvantage high cost, and with many restrictions: (i) all participants must online during the whole process (ii) invalidation of the dust transaction (iii) lock time is long for most cases. Such  cross-chain token exchange is both expensive and inefficient. In actual use, there are very few examples of the usage of HTLCs.
 
-为了实现去信任的、低成本的、高效率的token跨链操作，XClaim团队提出了cross claim方案，基于CBA。并且在XClaim的论文中详述了XClaim是如何完成以下四种操作的：Issue, Transfer, Swap and Redeem.
+In order to achieve a trust-free, low-cost, and efficient token cross-chain operation, the XClaim team proposed a cross claim scheme based on CBA. And in XClaim's paper, they explained in detail about how to complete the following four operations: Issue, Transfer, Swap and Redeem.
 
- XClaim系统中保证经济安全的角色被称为 $vault$,  如果任何人想要把chain $B$ 上的原生token $b$ 跨到 chain $I$ 变成 $i(b)$ ，那么就需要 $vault$ 在chain $I$ 上超额抵押 $i$ 。 在赎回操作中，如果 $vault$ 存在恶意行为，则罚掉 $vault$ 抵押的 $i$ ，用于赎回操作发起者。其他细节详见XClaim的论文[7]。
+ The role that ensuring economic security in the XClaim system is called $vault$. If anyone wants to transfer the native token $b$ of chain $B$ into $i(b)$ on chain $I$, then you need $vault$ over-collateralized $i$ on chain $I$. In the above four operations, if $vault$ has malicious behavior, the $i$ that $vault$ mortgaged  is penalized to compensate the cross-chain initiator. For additional details, see XClaim's paper [7].
 
-至此，对于流动性较好的Fungible token的跨链，已经得到一个可靠的、可实现的方案。
+So far, a reliable and achievable solution of Fungible token cross-chain has been obtained.
 
-### B. XClaim框架存在的问题
+### B. Unresolved issues of XClaim framework
 
-XClaim方案中有着一个基本假设，即跨链锁定的chain $B$ 的原生token $b$ 的总价值， 与在 $I$ 上发行出的 $i(b)$ 的总价值相等，在XClaim中被称为*symmetric*, 即 $\|b\| = \|i(b)\|$。这样的假设是的XClaim在NFT的跨链中存在着天然的困境：
+There is a basic assumption in the XClaim scheme that the total value of the native token $b$ of chain $B$ locked is equal to the total value of $i(b)$ issued on $I$. In XClaim, it is called symmetric, which is $ |b| = |i(b)|$. The assumption is that XClaim has a natural dilemma for NFT cross-chain:
 
-- NFT的不可替代性。正因为NFT具有可识别性、不可替代性等特点，使得 $vault$ 在 chain $I$ 上抵押chain $B$ 上的 NFT $nft_b$ 成了一件不可能的事情。
-- NFT的价值难以评估。在XClaim中，判断 $vault$ 的抵押是否足额/超额，是通过Oracle $O$ 实现的。这也存在一个潜在的假设：token $b$ 和 token $i$ 可以被正确地评估价值。基于目前繁荣的中心化和去中心化交易所，在提供了良好的流动性的情况下，是可以基本满足该潜在假设的。但是NFT交易所市场尚未成熟，即使中心化交易所也无法比较真实地反应市场对NFT的价格判断。NFT如何定价本身就是一个难题。
+- The irreplaceability of NFT. Because of the identifiability and irreplaceability of NFT, it is impossible for $vault$ to mortgage NFT $nft_b$ on chain $B$ on chain $I$.
+- The value of NFT is difficult to assess. In XClaim, determining whether the $vault$ collateral is full/overdated is achieved through Oracle $O$. So is also a potential assumption that token $b$ and token $i$ can be evaluated correctly. Based on the current prosperous centralization and decentralized exchanges, this potential assumption can be basically met in the case of providing good liquidity. However, the market of the NFT exchange is not yet mature, and even the centralized exchange cannot truly reflect the market's price judgment on the NFT. How NFT pricing itself is a problem.
 - NFT定价不具有连续性和可预测性。即使某个NFT在市场上有了一次成交记录，即有了一个价格，因为NFT被售出的频次远低于FT，即使在市场流动性非常好的情况下，该NFT下一次的成交价格既不连续，也不可预测。
 
 ### C. 解决方案和思路
