@@ -12,7 +12,7 @@ desc: Cross-chain NFT Bridge Protocol
 
 
 
-## I. 概述
+## I. Over view
 
 基于XClaim的框架给通证跨链提供了一个思路，但是对于NFT仍有很多问题，其中主要包括Backing Blockchain上 Vault抵押物设计的问题。通过在Backing Blockchain上引入chain-Relay合约可以有效的解决这个问题，本文将基于这个改进的跨链转接桥方案，设计跨链NFT的方案和标准。
 
