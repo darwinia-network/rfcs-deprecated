@@ -82,9 +82,9 @@ To this end, we chose to introduce some midway parsing state for each NFT that c
 
 - *Issuing Smart Contract*,  $iSC_N$:  means the asset issuing contract on chain *N*；
 - *Backing Smart Contract*,  $bSC_N$ : means the asset lock contract on chain $N$；
-- *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
+- *Verifying Smart Contract*,  $vSC_N$ : means the Validator model in Bridge Core that verify asset issuing contract/model on chain *N* ；
 - *Global identifier* ,  $GID$ , The global idendifier for the NFT in Darwinia Bridge Core
-- *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
+- *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. The idea stems from UTXO, when an UNFO is destroyed, another new UNFO will be generated at the same time.
 - *External Backing NFT*,  $nft_B^{x,n}$,  表示在chain $B$ 上，在合约 $x$ 中标识为 $n$ 的NFT
 - *Bridge Core Mirror for Backing NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  或简称$nft_{BC}^{B, n}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $B$ 上的 $nft_B^{x,n}$ 互为镜像，表示在对应 chain $B$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
 - *External Issueing NFT*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
