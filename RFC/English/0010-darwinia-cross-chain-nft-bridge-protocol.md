@@ -80,8 +80,8 @@ To this end, we chose to introduce some midway parsing state for each NFT that c
 
 ### A. Component definition
 
-- *Issuing Smart Contract*,  $iSC_N$:  means the asset issuing smart contract on chain *N*；
-- *Backing Smart Contract*,  $bSC_N$ : 表示在 chain $N$ 上的资产锁定合约；
+- *Issuing Smart Contract*,  $iSC_N$:  means the asset issuing contract on chain *N*；
+- *Backing Smart Contract*,  $bSC_N$ : means the asset lock contract on chain $N$；
 - *Verifying Smart Contract*,  $vSC_N$ : 表示在Bridge Core上负责验证 chain *N* 上交易的资产发行合约/模块；
 - *Global identifier* ,  $GID$ , The global idendifier for the NFT in Darwinia Bridge Core
 - *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. 该想法源于UTXO，当一个UNFO被销毁时，意味着同时会产生一个新的UNFO.
