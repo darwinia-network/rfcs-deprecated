@@ -146,9 +146,9 @@ When an UNFO is produced, it must satisfy:
 
 #### B.III. UNFO-based NFT mapping and resolution services
 
-The token parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the current token on the *Issuing chain* or its connected relay chain. A global state within the scope of the relay chain, and normalized into a parsing format to provide a pass-through parsing query and certification service for the cross-chain network.
+The token parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the global state of current token within the scope of *Issuing chain* or its connected relay chain, and normalized into a parsing format to provide token parsing query and certification service for the cross-chain network.
 
-在NFT通过Bridge Core 从B链转移至I链的过程中，Bridge Core会为每一个NFT分配一个GID，并将中间状态及其转移过程表达成UNFO，包括GID, (External Chain ID, External Contact Address, External Token ID), lock_script等信息。
+During the transition of the NFT from chain B to chain I, Bridge Core assigns a GID to each NFT and expresses the midway state and its transfer process as UNFO, including GID, (External Chain ID, External Contact Address)., External Token ID), lock_script and other information.
 
 这些UNFO记录集合会被归集在一个记录解析表里面，通过这个解析表，可以为跨链协议(e.g redeem)提供NFT通证解析服务，也可以为外部系统提供NFT解析服务。
 
