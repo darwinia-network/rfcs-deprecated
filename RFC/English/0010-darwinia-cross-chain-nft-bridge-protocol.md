@@ -130,15 +130,15 @@ Each UNFO can only be destroyed once, which makes it unnecessary to verify befor
 
 Just like Bitcoin's UTXO, there can be more than one Input and Output. This feature allows the NFT to perform some extended functions during the process of cross-chaining. such as NFT splitting and merging,
 
-一直一来，NFT都比FT有用更多的操作种类，例如在游戏中，作为道具的NFT要求可拆解、可合成、可升级等，为此扩展出了很多NFT标准，例如ERC721, ERC1155, ERC721X等。标准越多，越难被广泛使用。
+NFT has always been more useful than FT. For example, in games, the NFT as a prop is required to be detachable, synthesizable, and scalable. For this reason, many NFT standards, such as ERC721, ERC721X and ERC1155, have been extended and so on. The more standards, the more difficult it is to be widely used.
 
-如果其中的一些通用需求可以在跨链同时实现，可以有效地减少标准的数量和冗余度，一定程度上更有利于实现一个统一的标准。
+If some of the common requirements can be implemented during cross-chain process, the number and redundancy of standards can be effectively reduced, and to a certain extent, it is more conducive to achieve a unified standard.
 
 
 
-当一个UNFO产生时，一定要满足：
+When an UNFO is produced, it must satisfy:
 
-- 提供 *backing blockchain* 的 对应NFT 的锁定记录；
+- Provide a lock record for the corresponding NFT of *backing blockchain*;
 - 另一个UNFO被销毁
   - 条件：销毁和产生的UNFO的GID必须相同
 
