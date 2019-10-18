@@ -89,14 +89,14 @@ To this end, we chose to introduce some midway parsing state for each NFT that c
 - *Bridge Core Mirror for Backing NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  aka $nft_{BC}^{B, n}$ ，the NFT cross-chained into Bridge Core with midway state, and mirroring with $nft_B^{x,n}$  on chain $B$, which means a corresponding NFT to be issued/locked on chain $B$.  $unfo_{gid}$ means the UNFO midway state of NFT inside Bridge Core.
 - *External Issueing NFT*,  $nft_I^{x',n'}$,  means the NFT issued on chain $I$ after cross-chain, with contract  $x'$,  marked as $n'$,
 - *Bridge Core Mirror for Issuing NFT*,$nft_{BC(unfo_{gid})}^{I,x',n'}$, aka $nft_{BC}^{I, n'}$ ，means the NFT cross-chain into Bridge Core with midway state, and mirroring with $nft_I^{x',n'}$ on chain $I$, and suggesting a NFT on chain $I$ is to be issued/locked.  $unfo_{gid}$ means the the UNFO of NFT inside Bridge Core with midway state.
-- *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
-- *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
-- *Extrinsic Issue*,  $EX_{issue}$ , Bridge Core上的 issue 的交易
-- *Extrinsic redeem*,  $EX_{redeem}$ , Bridge Core上的 redeem 的交易
+- *Locking Transaction* ,  $T_{B}^{lock}$,  the transaction lock NFT in  $bSC_B$ on chain *B*
+- *Redeem Transaction* ,  $T_I^{redeem}$， the transaction lock NFT in $bSC_I$ on chain *I*
+- *Extrinsic Issue*,  $EX_{issue}$ , the issure transaction in Bridge Core
+- *Extrinsic redeem*,  $EX_{redeem}$ , the redeem transaction in Bridge Core.
 
-参与方：
+Participants:
 
-- *validator*,  维护 Bridge Core 的参与方；
+- *validator*,  the participant  that maintin Bridge Core；
 
 ### B. UNFO 实现和作用
 
