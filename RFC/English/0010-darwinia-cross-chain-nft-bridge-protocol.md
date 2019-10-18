@@ -173,8 +173,8 @@ GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ether
   Figure: UNFO Set Table Sample
 </center> 备注:
 
-1. External Token ID有可能是未知状态，用"?"表示，之所以会出现这种情况，是因为在issue过程中, 目标发行链上生成的External Token ID 不会通知和反馈给Bridge Core，没有相关的交易证明信息，UNFO也就只好设置该值为未知。但是，当后面某些新的赎回交易发生时，发起者发送给Bridge Core的赎回交易有可能会包含GID和External Token ID，此时可以通过这个交易证明，更新原来未知的External Token ID值为已知值。
-2. 为了保持良好的一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过上面提到的解析服务，至历史UNFO记录里面查询相应的External Token ID，以保持一致性。
+1. The External Token ID may be in an unknown state, indicated by "?". This happens because the External Token ID generated on the target distribution chain is not notified and fed back to Bridge Core during the issue process. Without transaction proof information, UNFO had to set the value to be unknown. However, when some new redemption transactions occur later, the redemption transaction sent by the initiator to Bridge Core may contain the GID and External Token ID. At this time, the original unknown Token ID value can be updated to a known value by this transaction certificate.
+2. To maintain good consistency, within the life cycle of the NFT cross-chain flow that by passing Bridge Core, it is desirable to keep the mapping relationship between the External Chain ID and the (External Contact Address, External Token ID) unchanged. Parse the service and query the corresponding External Token ID in the historical UNFO record to maintain consistency.
 
 ### C. 初步实现方案
 
