@@ -139,14 +139,14 @@ If some of the common requirements can be implemented during cross-chain process
 When an UNFO is produced, it must satisfy:
 
 - Provide a lock record for the corresponding NFT of *backing blockchain*;
-- 另一个UNFO被销毁
-  - 条件：销毁和产生的UNFO的GID必须相同
+- Another UFNO destroyed
+  - Condition: The GID of the destroyed and produced UNFO must be the same
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
-#### B.III. 基于UNFO的NFT映射和解析服务
+#### B.III. UNFO-based NFT mapping and resolution services
 
-通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和证明服务。
+The token parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the current token on the *Issuing chain* or its connected relay chain. A global state within the scope of the relay chain, and normalized into a parsing format to provide a pass-through parsing query and certification service for the cross-chain network.
 
 在NFT通过Bridge Core 从B链转移至I链的过程中，Bridge Core会为每一个NFT分配一个GID，并将中间状态及其转移过程表达成UNFO，包括GID, (External Chain ID, External Contact Address, External Token ID), lock_script等信息。
 
