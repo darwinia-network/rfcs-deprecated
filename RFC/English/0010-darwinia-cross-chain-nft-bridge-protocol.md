@@ -124,9 +124,9 @@ struct UNFO {
 
 We chose to use the UNFO model as a storage/state flow unit. The UNFO model is a design idea similar to the UTXO model.
 
-当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
+The destruction of one UNFO means the creation of another, if we trace the history of UNFO's destruction and creation, we can trace back the entire cross-chain history of an NFT, which helps to achieve the NFT's identifiability to a certain extent.
 
-每个UNFO只能被销毁一次，这使得计算前不一定要先验证，从而提高了处理速度；
+Each UNFO can only be destroyed once, which makes it unnecessary to verify before the calculation, thus improving the processing speed;
 
 正如比特币的UTXO一样，Input和Output都可以有多个，这样的特点使得NFT在跨链的过程中，可以同时完成一些扩展功能，例如NFT的拆分和合并。
 
