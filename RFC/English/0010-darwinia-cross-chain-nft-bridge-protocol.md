@@ -87,7 +87,7 @@ To this end, we chose to introduce some midway parsing state for each NFT that c
 - *Unspent Non-Fungible Output* ,  $UNFO$, Intermediate Resolution State for the NFT in Darwinia Bridge Core, aka. unspent NFT output. The idea stems from UTXO, when an UNFO is destroyed, another new UNFO will be generated at the same time.
 - *External Backing NFT*,  $nft_B^{x,n}$, means the NFT marked as   $n$  on chain $B$ with contract $x$.
 - *Bridge Core Mirror for Backing NFT*, $nft_{BC(unfo_{gid})}^{B,x,n}$,  aka $nft_{BC}^{B, n}$ ，the NFT cross-chained into Bridge Core with midway state, and mirroring with $nft_B^{x,n}$  on chain $B$, which means a corresponding NFT to be issued/locked on chain $B$.  $unfo_{gid}$ means the UNFO midway state of NFT inside Bridge Core.
-- *External Issueing NFT*,  $nft_I^{x',n'}$,  表示跨链后在chain $I$ 上新增发的、在合约 $x'$ 中标识为 $n'$ 的NFT
+- *External Issueing NFT*,  $nft_I^{x',n'}$,  means the NFT issued on chain $I$ after cross-chain, with contract  $x'$,  marked as $n'$,
 - *Bridge Core Mirror for Issuing NFT*,$nft_{BC(unfo_{gid})}^{I,x',n'}$, 或简称 $nft_{BC}^{I, n'}$ ，跨链到Bridge Core中的中间状态的NFT, 并且和 chain $I$ 上的 $nft_I^{x',n'}$ 互为镜像，表示在对应 chain $I$ 中有一个即将被发行/已锁定的 NFT.  $unfo_{gid}$ 表示该NFT在 Bridge Core 内的中间态UNFO.
 - *Locking Transaction* ,  $T_{B}^{lock}$,  在 chain *B* 上把 NFT 锁定在 $bSC_B$ 中的交易
 - *Redeem Transaction* ,  $T_I^{redeem}$， 在chain *I* 上把 NFT 锁定在 $bSC_I$ 中的交易
