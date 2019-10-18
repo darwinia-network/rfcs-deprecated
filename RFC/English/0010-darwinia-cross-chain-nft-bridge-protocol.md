@@ -150,7 +150,7 @@ The token parsing module is a module embedded in the NFT cross-chain protocol fo
 
 During the transition of the NFT from chain B to chain I, Bridge Core assigns a GID to each NFT and expresses the midway state and its transfer process as UNFO, including GID, (External Chain ID, External Contact Address)., External Token ID), lock_script and other information.
 
-这些UNFO记录集合会被归集在一个记录解析表里面，通过这个解析表，可以为跨链协议(e.g redeem)提供NFT通证解析服务，也可以为外部系统提供NFT解析服务。
+These UNFO record collections are grouped into a resolution table. Analysis table can provide NFT certificate resolution services for cross-chain protocols (e.g redeem) or NFT resolution services for external systems.
 
 | UNFO | GID     | Externl Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
 | ---- | ------- | ---------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
