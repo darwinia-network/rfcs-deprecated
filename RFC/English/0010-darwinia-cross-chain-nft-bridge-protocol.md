@@ -116,13 +116,13 @@ struct UNFO {
 - **phase**：indicates the stage of cross-chain of the UNFO. Eg:
   - 1: the correspond NFT on blockchain *chain_id* of the UNFO was looked, the cross-chain process is in midway state
   - 2: the correspond Nft of the Unfo on blockchain *chain_id*has been issued/to be issued；cross-chain process has been finished/to be finished.
-- **lock_script**：用于更加复杂逻辑、细粒度的控制脚本，保持UNFO的可扩展性。lock_script表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约
+- **lock_script**: For more complex logic, fine-grained control scripts that maintain UNFO's scalability. Lock_script expresses the owner of this NFT. When the NFT is circulating within the Bridge Core, the lock_script may point to an ownership contract. When the NFT is locked in the backing contract, the lock_script may point to to the redeem contract of backing contract.
 
 
 
-#### B.II. UNFO的转换
+#### B.II. UNFO Conversion
 
-我们选择用UNFO模型作为存储/状态 的流转单元，UNFO模型是一种类似UTXO模型的设计思路。
+We chose to use the UNFO model as a storage/state flow unit. The UNFO model is a design idea similar to the UTXO model.
 
 当一个UNFO的销毁，意味着另一个UNFO的创建，如果我们追溯UNFO的销毁创造历史，就可以回溯某个NFT的全部跨链历史，这一定程度上帮助实现了NFT的可识别性；
 
