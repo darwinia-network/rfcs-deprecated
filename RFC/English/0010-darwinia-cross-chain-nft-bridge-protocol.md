@@ -115,7 +115,7 @@ struct UNFO {
 - **global_id**：indicates this UNFO has Globally unique identifier within all blockchain it crossed.
 - **phase**：indicates the stage of cross-chain of the UNFO. Eg:
   - 1: the correspond NFT on blockchain *chain_id* of the UNFO was looked, the cross-chain process is in midway state
-  - 2: 该UNFO对应区块链 *chain_id* 上的NFT待发行/已发行；跨链过程即将完成/已完成
+  - 2: the correspond Nft of the Unfo on blockchain *chain_id*has been issued/to be issued；cross-chain process has been finished/to be finished.
 - **lock_script**：用于更加复杂逻辑、细粒度的控制脚本，保持UNFO的可扩展性。lock_script表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约
 
 
