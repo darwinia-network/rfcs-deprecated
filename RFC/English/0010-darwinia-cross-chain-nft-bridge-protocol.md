@@ -50,7 +50,7 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 ### C. Solution Description
 
-There are two NFT cross-chain solutions to the above problems. One is based on the NFT extension of the XClaim framework and retaining the bridge pledge mechanism. By introducing the Harberger mechanism to solve the NFT pricing problem, a detailed solution can be found:[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). However, this solution still cannot solve the problem of insufficient pledge due to the price change of NFT.
+解决以上问题的NFT跨链方案有两种思路，一种是基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). However, this solution still cannot solve the problem of insufficient pledge due to the price change of NFT.
 
 Another idea is to introduce ChainRelay into the Backing Blockchain to offer more protection for the backing assets so that the pledge mechanism is no longer needed. It is called: [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md). Detailed introduction will not be described in detail here, and instead this article will focus on designing a cross-chain NFT standard based on this improved cross-chain bridge solution, and proposing a lower cost high extensible function cross-chain protocol for the case of mutual cross among multiple blockchains.
 
