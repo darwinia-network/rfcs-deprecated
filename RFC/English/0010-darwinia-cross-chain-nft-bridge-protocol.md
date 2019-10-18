@@ -98,9 +98,9 @@ Participants:
 
 - *validator*,  the participant  that maintin Bridge Core；
 
-### B. UNFO 实现和作用
+### B. UNFO Realization and effect
 
-#### B.I UNFO的数据结构
+#### B.I UNFO data structure
 
 ```rust
 struct UNFO {
@@ -111,10 +111,10 @@ struct UNFO {
 }
 ```
 
-- **local_id**：表示该UNFO对应着某个外部区块链 *chain_id* 上某个 *smart_contract_id* 里的 *token_id*
-- **global_id**：表示该UNFO在Bridge Core和所有被夸的区块链范围内的全局唯一标识
-- **phase**：表示该UNFO在跨链过程中所处的阶段。比如：
-  - 1: 该UNFO对应区块链 *chain_id* 上的NFT被锁定/销毁；跨链过程处于中间状态；
+- **local_id**：Indicates that the UNFO corresponds to the *token_id* of *smart_contract_id* on an external blockchain *chain_id*
+- **global_id**：indicates this UNFO has Globally unique identifier within all blockchain it crossed.
+- **phase**：indicates the stage of cross-chain of the UNFO. Eg:
+  - 1: the correspond NFT on blockchain *chain_id* of the UNFO was looked, the cross-chain process is in midway state
   - 2: 该UNFO对应区块链 *chain_id* 上的NFT待发行/已发行；跨链过程即将完成/已完成
 - **lock_script**：用于更加复杂逻辑、细粒度的控制脚本，保持UNFO的可扩展性。lock_script表达的是这个NFT的所有者是谁，当该NFT在Bridge Core之内流转时，该lock_script指向的可能是某个ownership contract，当NFT被锁定在backing contract里面时，lock_script指向的可能是backing contract的redeem合约
 
