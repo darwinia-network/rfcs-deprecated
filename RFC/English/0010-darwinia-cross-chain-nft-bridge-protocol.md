@@ -128,7 +128,7 @@ The destruction of one UNFO means the creation of another, if we trace the histo
 
 Each UNFO can only be destroyed once, which makes it unnecessary to verify before the calculation, thus improving the processing speed;
 
-正如比特币的UTXO一样，Input和Output都可以有多个，这样的特点使得NFT在跨链的过程中，可以同时完成一些扩展功能，例如NFT的拆分和合并。
+Just like Bitcoin's UTXO, there can be more than one Input and Output. This feature allows the NFT to perform some extended functions during the process of cross-chaining. such as NFT splitting and merging,
 
 一直一来，NFT都比FT有用更多的操作种类，例如在游戏中，作为道具的NFT要求可拆解、可合成、可升级等，为此扩展出了很多NFT标准，例如ERC721, ERC1155, ERC721X等。标准越多，越难被广泛使用。
 
