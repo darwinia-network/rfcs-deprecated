@@ -207,7 +207,7 @@ Note: For $iSC$ on the external blockchain, the global ID and local ID mappings 
 
 #### Protocol: Redeem
 
-(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$lock\_I(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
+(i) ***lock***. *redeemer* locks the NFT asset $nft_I^{x', n'}$ on chain $I$ in $bSC_I$ (if there is a corresponding GID, it needs to declare $GID$ when locked)), declare the destination public chain $B$ and its own address on the chain $B$; $bSC_I$ will atomically confirm the correctness of $GUID$ in $iSC_I$. This step will generate the transaction $T_I^{redeem}$. $lock\_I(nft\_id\_on\_I,\GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
 
 (ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
 
