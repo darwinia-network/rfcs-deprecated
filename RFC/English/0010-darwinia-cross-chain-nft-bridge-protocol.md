@@ -186,14 +186,14 @@ The scenario is the same as described in Chapter II. Still need to implement thr
 
 (ii) ***Issue in Bridge Core***. *requester* will lock the transaction $TB^{lock}$ to Bridge Core, and after verified by the corresponding chain relay, it will trigger $vSC_B$ in $vSC_B$:
 
-- 产生新的$GID$ 和 $nft_{BC}^{B,n}$ , 记录 $GID$ 和 $nft_{BC}^{B,n}$ 二者之间的关系，
-- 并触发$vSC_I$
+- Generate new $GID$ and $nft_{BC}^{B,n}$ , and record the relationship between $GID$ and $nft_{BC}^{B,n}$
+- And trigger $vSC_I$
 
-在 $vSC_I$ 中：
+In $vSC_I$：
 
--  销毁  $nft_{BC}^{B,n}$，发行 $nft_{BC}^{I,?}$， $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{issue}$
+-  Destroy $nft_{BC}^{B,n}$, issue $nft_{BC}^{I,?}$, $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{ Issue}$
 
-(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 并记录 $GID$ 和 $nft_I^{x', n'}$的关系， 且将所有权交给 *requester* 在chain *I* 上的地址
+(iii) ***issue***. *requester* submit $EX_{issue}$ to chain $I$ , which will issue New NFT: $nft_I^{x', n'}$ in $iSC_I$ after passing the chain relay verification on chain $I$ , and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
 
 注: 对于外部区块链上的$iSC$来说，在发行时，也需要在外部区块链上，将全局ID和本地ID的映射记录下来，因为后面redeem的时候，需要使用这个映射关系来完成redeem.
 
