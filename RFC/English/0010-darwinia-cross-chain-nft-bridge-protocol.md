@@ -240,7 +240,7 @@ Explanation:
 
   If the result is T, then newGid($nft_B^{x,n}$) is automatically triggered in $vSC_B$, a new GID and the mirror of $nft_B^{x,n}$ in Bridge Core $nft_ {BC}^{B,n}$ are generated, and establish the correspondence between GID and $nft_{BC}^{B,n}$
 
-- **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $I$. *requester* submit $EX_{issue}$ to $iSC_I$ in chain $I$, return T if $iSC_I$ verifies the authenticity of $EX_{issue}$, otherwise return F. After verification, issue  $nft_I^{x',n'}$ to *requester* at the address of chain $I$.
+- **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $I$. *requester* submit $EX_{issue}$ to $iSC_I$ in chain $I$, return T if $iSC_I$ verifies the authenticity of $EX_{issue}$, otherwise return F. After verification, by calling the issue method, issue  $nft_I^{x',n'}$ to *requester* at the address of chain $I$.
 
 ###### *validator* Related operations：
 
@@ -268,11 +268,11 @@ Explanation:
 
 - **burn**( $nft_I^{x',n'}$, $GID$, $pk_B^{redeemer}$ ) : Occurs on chain $I$ . *redeemer* triggers $bSC_I$ to destroy $nft_I^{x',n'}$, but keeps the destruction record, $bSC_I$ can atomically check $GID$ and $nft_I^{x',n'}$ correspondence. This operation will generate the transaction $T_I^{redeem}$
 - **verifyIOp**(burn, $T_I^{redeem}$, $\Delta_{redeem}$) : Occurs within Bridge Core. The user submits $T_I^{redeem}$ to $vSC_I$. If $T_I^{redeem}$ actually happened on chain $I$ and met the minimum required delay of $\Delta_{redeem}$, then Find the corresponding $nft_{BC}^{I,?}$ according to $GID$ and automatically complete it to $nft_{BC}^{I,n'}$
-- **verifyBCOp**(trigger, $EX_{redeem}$, $\Delta_{trigger}$) $\rightarrow T$ :  发生在 chain $B$ 内。*redeemer* 将 $EX_{redeem}$ 提交至chain $B$ 的 $iSC_B$ 内，如果$iSC_B$ 验证 $EX_{redeem}$ 的真实性即返回T，否则返回F。验证通过后，即通过调用issue方法，即释放 $nft_B^{x,n}$ 到 *redeemer* 在 chain $B$ 的地址上。
+- **verifyBCOp**(trigger, $EX_{redeem}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $B$. *redeemer* submit $EX_{redeem}$ to $iSC_B$ in chain $B$ and return T if $iSC_B$ verifies the authenticity of $EX_{redeem}$, otherwise return F. After verification passed, by calling the issue method, $nft_B^{x,n}$ is released to *redeemer* at the address of chain $B$.
 
-###### *validator* 相关操作：
+###### *validator* Related operations:
 
-- **burnTransform**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* 自动触发 $vSC_B$ 中的方法， 将 $nft_{BC}^{I,n'}$ 销毁同时产生 $nft_{BC}^{B,n}$, 表示在chain $B$ 上即将释放的nft的镜像。这次操作将产生 $EX_{redeem}$.
+- **burnTransform**($vSC_B,\ GID,\ nft_{BC}^{x,n},\ pk_B^{redeemer}$ ): *validator* automatically triggers the method in $vSC_B$, destroying $nft_{BC}^{I,n'}$ and generating $nft_{BC}^{B,n}$, which indicates the image of nft will be released on chain $B$. This operation will generate $EX_{redeem}$.
 
 
 
@@ -280,19 +280,19 @@ Explanation:
 
 ## IV. Cross-chain NFT Standards
 
-跨链环境下，NFT会出现在不同的区块链网络中，并且其可用状态可能不断变化，因此类似原来单链网络内的标准和方案(例如，Ethereum ERC20)，已经无法满足跨链NFT标准的需要。
+In a cross-chain environment, NFT will appear in different blockchain networks, and its availability state may change constantly. Therefore, standards and solutions (such as Ethereum ERC20) in the original single-chain network cannot meet the requirements of NFT cross-chain standards.
 
-跨链NFT标准面临的识别性和解析问题，需要新的解决方案和标准来解决。因此我们引入一个基于通证跨链证明的解析系统来解决通证跨链时的定位和解析需求，通过通证解析系统和域内唯一标识，我们可以存在与不同域的通证之间的关联关系映射起来，并标识他们之间的相同与不同。
+The identifiability and resolution issues of cross-chain Nft standards require new solutions and standards to address. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
 
-### A. 设计范围
+### A. Design Range
 
-- 全局唯一标识和外部本地标识规范
+- Globally unique identifier and external local identity specification
 
-  为了将不同标准的通证标识符进行规范化，以提供识别和解析方法，与现有的标准进行很好的协调和对接，并满足社区基础设施建设的标准需求。识别标识分为全局唯一标识和外部本地标识。
+  In order to standardize the different standard pass identifiers, to provide identification and analysis methods, coordinate and interface with existing standards, and meet the standard requirements of community infrastructure construction. The identification identifier is divided into a global unique identifier and an external local identifier.
 
-- NFT解析系统
+- NFT Resolution system
 
-- NFT所有权管理
+- NFT ownership management
 
 - Inter-parachain NFT Transfers
 
