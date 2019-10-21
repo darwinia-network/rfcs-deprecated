@@ -242,7 +242,7 @@ Explanation:
 
 - **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $I$. *requester* submit $EX_{issue}$ to $iSC_I$ in chain $I$, return T if $iSC_I$ verifies the authenticity of $EX_{issue}$, otherwise return F. After verification, issue  $nft_I^{x',n'}$ to *requester* at the address of chain $I$.
 
-###### *validator* 相关操作：
+###### *validator* Related operations：
 
 - **issueTransform**($vSC_I,\ pk_I^{requester},\ GID$ ): *validator* 会自动触发 $vSC_I$ 中的方法， 将 $nft_{BC}^{B,n}$ 销毁并产生 $nft_{BC}^{I,?}$ 表示在chain $I$ 上即将新增发的nft的镜像（这里之所以用$?$ 因为此时chain $I$ 上的nft还未被增发，因此无法获取其token id），并建立 GID和 $nft_{BC}^{I,?}$ 对应关系。这次操作将产生 $EX_{issue}$.
 
