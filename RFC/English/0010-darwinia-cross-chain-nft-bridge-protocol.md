@@ -244,7 +244,7 @@ Explanation:
 
 ###### *validator* Related operations：
 
-- **issueTransform**($vSC_I,\ pk_I^{requester},\ GID$ ): *validator* 会自动触发 $vSC_I$ 中的方法， 将 $nft_{BC}^{B,n}$ 销毁并产生 $nft_{BC}^{I,?}$ 表示在chain $I$ 上即将新增发的nft的镜像（这里之所以用$?$ 因为此时chain $I$ 上的nft还未被增发，因此无法获取其token id），并建立 GID和 $nft_{BC}^{I,?}$ 对应关系。这次操作将产生 $EX_{issue}$.
+- **issueTransform**($vSC_I,\ pk_I^{requester},\ GID$ ): *validator* will automatically trigger the method in vSC_I$, and destroys $nft_{BC}^{B,n}$ while produces $nft_{BC}^{I,?}$, to represent the newly added nft image on chain $I$ (The reason why $?$ is used here is because nft on chain $I$ has not been added yet, so its token id cannot be obtained), and establish the correspondence between GID and $nft_{BC}^{I,?}$ This operation will generate $EX_{issue}$.
 
 
 
@@ -252,7 +252,7 @@ Explanation:
 
 ![image-20190927191635665](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8pswk9j3120050aac.jpg)
 
-解释：
+Explanation:
 
 在 chain $I$ 上 *sender* 调用 $iSC_I$ 中的 transfer方法，将 $nft_I^{x',n'}$ 发送给 *receiver*
 
