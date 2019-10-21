@@ -184,7 +184,7 @@ The scenario is the same as described in Chapter II. Still need to implement thr
 
 (i) ***lock***. *requester* lock the NFT asset $nft_B^{n,x}$ on chain $B$ in $bSC_B$ and declare the destination public chain *I* and the address of itself on the chain $I$; this step will generate the transaction $T_B^{lock}$
 
-(ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
+(ii) ***Issue in Bridge Core***. *requester* will lock the transaction $TB^{lock}$ to Bridge Core, and after verified by the corresponding chain relay, it will trigger $vSC_B$ in $vSC_B$:
 
 - 产生新的$GID$ 和 $nft_{BC}^{B,n}$ , 记录 $GID$ 和 $nft_{BC}^{B,n}$ 二者之间的关系，
 - 并触发$vSC_I$
