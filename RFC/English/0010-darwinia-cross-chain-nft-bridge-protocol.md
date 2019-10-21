@@ -195,13 +195,13 @@ In $vSC_I$：
 
 (iii) ***issue***. *requester* submit $EX_{issue}$ to chain $I$ , which will issue New NFT: $nft_I^{x', n'}$ in $iSC_I$ after passing the chain relay verification on chain $I$ , and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
 
-注: 对于外部区块链上的$iSC$来说，在发行时，也需要在外部区块链上，将全局ID和本地ID的映射记录下来，因为后面redeem的时候，需要使用这个映射关系来完成redeem.
+Note: For $iSC$ on the external blockchain, the global ID and local ID mappings need to be recorded on the external blockchain at the time of release, because this mapping is required to complete redeem.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
 
-(i) ***转移***。*sender* 在 $I$ 上把 $nft_I^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
+(i) ***transfer***. *sender* put $nft_I^{x',n'}$ on $I$ in $iSC_I$ and transfer ownership to *receiver*, refer to ERC721.
 
 (ii) ***见证***。当 $nft_I^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_I^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
 
