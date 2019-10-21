@@ -203,7 +203,7 @@ Note: For $iSC$ on the external blockchain, the global ID and local ID mappings 
 
 (i) ***transfer***. *sender* put $nft_I^{x',n'}$ on $I$ in $iSC_I$ and transfer ownership to *receiver*, refer to ERC721.
 
-(ii) ***见证***。当 $nft_I^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_I^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
+(ii) ***witness***.When the ownership of $nft_I^{x',n'}$ in $iSC_I$ has been transferred, both $iSC_I$ and $bSC_I$ should be aware. At this point, when *sender* wants to redeem $nft_I^{x',n'}$, it needs to be locked in $bSC_I$ first, then $ bSC_I$ will not allow the operation to succeed.
 
 #### Protocol: Redeem
 
