@@ -50,7 +50,7 @@ There is a basic assumption in the XClaim scheme that the total value of the nat
 
 ### C. Solution Description
 
-解决以上问题的NFT跨链方案有两种思路，一种是基于XClaim框架并保留桥质押机制的的NFT扩展，通过引入哈伯格机制来解决NFT定价问题，详细的解决方案见[RFC-0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). However, this solution still cannot solve the problem of insufficient pledge due to the price change of NFT.
+There are two ideas for the NFT cross-chain solution regarding the above problems. First one is based on the XClaim framework and retains the NFT extension of the bridge pledge mechanism. The Harberger mechanism is introduced to solve the NFT pricing problem. For detailed solutions, see [RFC. -0011: Using Harberger Tax to find price for XClaim Vault Collaterals](./0011-using-harberger-tax-to-find-price-for-xclaim-vault-collaterals.md). However, this solution still cannot solve the problem of insufficient pledge due to the price change of NFT.
 
 Another idea is to introduce ChainRelay into the Backing Blockchain to offer more protection for the backing assets so that the pledge mechanism is no longer needed. It is called: [RFC-0012: Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains](./0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains.md). Detailed introduction will not be described in detail here, and instead this article will focus on designing a cross-chain NFT standard based on this improved cross-chain bridge solution, and proposing a lower cost high extensible function cross-chain protocol for the case of mutual cross among multiple blockchains.
 
@@ -144,83 +144,74 @@ When an UNFO is produced, it must satisfy:
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
-#### B.III. UNFO-based NFT mapping and resolution services
+#### B.III. 基于UNFO的NFT映射和ID一致性
 
-The token parsing module is a module embedded in the NFT cross-chain protocol for recording and parsing the global state of current token within the scope of *Issuing chain* or its connected relay chain, and normalized into a parsing format to provide token parsing query and certification service for the cross-chain network.
+Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安全即可，但是NFT对可识别性有更高的要求，因此需要再跨链时更好的维护NFT CBA和原生资产的一一映射，并保持ID的一致性，包括GID和External Locol ID。
 
-During the transition of the NFT from chain B to chain I, Bridge Core assigns a GID to each NFT and expresses the midway state and its transfer process as UNFO, including GID, (External Chain ID, External Contact Address)., External Token ID), lock_script and other information.
-
-These UNFO record collections are grouped into a resolution table. Analysis table can provide NFT certificate resolution services for cross-chain protocols (e.g redeem) or NFT resolution services for external systems.
-
-| UNFO | GID     | Externl Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
-| ---- | ------- | ---------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
-| 1    | GID0001 | Ethereum         | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
-| 2    | GID0001 | Tron             | B_TRC721                 | ?                 | script_backing_redeem          | True          |
-| 3    | GID0002 | EOS              | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
-| 4    | GID0002 | EOS              | C_dGoods                 | 2.5.4             | script_ownership_contract      | True          |
-| 5    | GID0003 | Bridge Core      | None                     | None              | script_ownership_contract      | True          |
-| 6    | GID0004 | ETC              | ETC_ERC721               | 23                | script_issuing_burn_or_relay | False         |
-| 7    | GID0004 | Ethereum         | D_ERC1155                | 13                | script_backing_redeem          | False         |
-
-GID0001: This NFT is cross-chain transfered from (Ethereum, A_ERC721, 12) to (Tron, B_TRC721, ?) trough Bridge Core, Currently it is active on Tron.
-
-GID0002: This NFT is cross-chain transfered from (EOS, C_dGoods, 2.5.4) to an account Bridge Core,the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
-
-GID0003: This NFT is originally created on Bridge Core, it is recorded as UNFO because the golobal identifier is generated in the UNFO module, the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
-
-GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ethereum, D_ERC1155, ?) trough Bridge Core, and then redeem reversely back. The 7th UNFO's External Local ID is unknow before redeem, but when redeeming, it will be updated to reveal it's value.
+| UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
+| ---- | ------- | ----------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
+| 1    | GID0001 | Ethereum          | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
+| 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem          | True          |
+| 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
-  Figure: UNFO Set Table Sample
-</center> Remark:
+  基于UNFO的映射表示例
+</center> 假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
 
-1. The External Token ID may be in an unknown state, indicated by "?". This happens because the External Token ID generated on the target distribution chain is not notified and fed back to Bridge Core during the issue process. Without transaction proof information, UNFO had to set the value to be unknown. However, when some new redemption transactions occur later, the redemption transaction sent by the initiator to Bridge Core may contain the GID and External Token ID. At this time, the original unknown Token ID value can be updated to a known value by this transaction certificate.
-2. To maintain good consistency, within the life cycle of the NFT cross-chain flow that by passing Bridge Core, it is desirable to keep the mapping relationship between the External Chain ID and the (External Contact Address, External Token ID) unchanged. Parse the service and query the corresponding External Token ID in the historical UNFO record to maintain consistency.
+> nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
+
+在没有NFT的跨链映射表的情况下，
+
+> Alice在跨链桥M(A->B)中，将nft(A, X, 1) 变为 nft(B, Y, 2) ；又通过跨链桥N(B->C)，将nft(B, Y, 2) 变为 nft(C, Z, 3)。之后，当Alice想继续使用跨链桥M将C链上的nft 跨链去 A链的话，因为没有跨链映射表查询该NFT在A中的ID信息，跨链桥M会将 nft(C, Z, 3) 识别为新的NFT CBA，这样很可能在跨回A链时，将不再是nft(A, X, 1)，而是nft(A, X, 5). NFT就丢失了自己的可识别性和ID一致性，会给协议和赎回过程带来额外的复杂性和混乱。
+
+为了尽可能减少丢失NFT可识别性对用户造成的潜在资产损失，如果NFT在Bridge Core连接的网络之内跨链，则用户可以获取到Bridge Core上某个NFT当前的基于UNFO的NFT映射表，协议将可以约束用户跨链回A链的NFT需要遵循ID一致性和可识别性。这样，至少在Darwinia Bridge Core系统内，NFT可保证可识别性不被破坏。
+
+为了保持良好的ID一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过基于UNFO的解析服务，至UNFO映射表里面查询相应的External Token ID，以保持一致性。在RFC-0013章节III.D中，我们还将详细介绍NFT解析模块。
 
 ### C. Preliminary Implementation Plan
 
-The scenario is the same as described in Chapter II. Still need to implement three protocols：*Issue, Transfer, Redeem*. Also to simplify the model, the details about fees will not be discussed here.
+场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
 
 #### Protocol: Issue
 
-(i) ***lock***. *requester* lock the NFT asset $nft_B^{n,x}$ on chain $B$ in $bSC_B$ and declare the destination public chain *I* and the address of itself on the chain $I$; this step will generate the transaction $T_B^{lock}$
+(i) ***锁定***。*requester* 将 chain $B$上的NFT资产 $nft_B^{n,x}$ 锁定在 $bSC_B$ 中，同时声明目的地公链 chain *I* 以及自己在chain $I$ 上的地址；这一步将产生交易$T_B^{lock}$
 
-(ii) ***Issue in Bridge Core***. *requester* will lock the transaction $TB^{lock}$ to Bridge Core, and after verified by the corresponding chain relay, it will trigger $vSC_B$ in $vSC_B$:
+(ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
 
 - Generate new $GID$ and $nft_{BC}^{B,n}$ , and record the relationship between $GID$ and $nft_{BC}^{B,n}$
 - And trigger $vSC_I$
 
-In $vSC_I$：
+在 $vSC_I$ 中：
 
 -  Destroy $nft_{BC}^{B,n}$, issue $nft_{BC}^{I,?}$, $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{ Issue}$
 
-(iii) ***issue***. *requester* submit $EX_{issue}$ to chain $I$ , which will issue New NFT: $nft_I^{x', n'}$ in $iSC_I$ after passing the chain relay verification on chain $I$ , and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
+(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 并记录 $GID$ 和 $nft_I^{x', n'}$的关系， 且将所有权交给 *requester* 在chain *I* 上的地址
 
-Note: For $iSC$ on the external blockchain, the global ID and local ID mappings need to be recorded on the external blockchain at the time of release, because this mapping is required to complete redeem.
+注: 对于外部区块链上的$iSC$来说，在发行时，也需要在外部区块链上，将全局ID和本地ID的映射记录下来，因为后面redeem的时候，需要使用这个映射关系来完成redeem.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
 
-(i) ***transfer***. *sender* put $nft_I^{x',n'}$ on $I$ in $iSC_I$ and transfer ownership to *receiver*, refer to ERC721.
+(i) ***转移***。*sender* 在 $I$ 上把 $nft_I^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
 
-(ii) ***witness***.When the ownership of $nft_I^{x',n'}$ in $iSC_I$ has been transferred, both $iSC_I$ and $bSC_I$ should be aware. At this point, when *sender* wants to redeem $nft_I^{x',n'}$, it needs to be locked in $bSC_I$ first, then $ bSC_I$ will not allow the operation to succeed.
+(ii) ***见证***。当 $nft_I^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_I^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
 
 #### Protocol: Redeem
 
-(i) ***lock***. *redeemer* locks the NFT asset $nft_I^{x', n'}$ on chain $I$ in $bSC_I$ (if there is a corresponding GID, it needs to declare $GID$ when locked)), declare the destination public chain $B$ and its own address on the chain $B$; $bSC_I$ will atomically confirm the correctness of $GUID$ in $iSC_I$. This step will generate the transaction $T_I^{redeem}$. $lock\_I(nft\_id\_on\_I,\GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
+(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$lock\_I(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
 
-(ii) ***Unlock on Bridge Core***. *redeemer* submits $T_I^{redeem}$ to $vSC_I$ and validates it in the chain relay, in $vSC_I$:
+(ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
 
 - Record the correspondence between $GID$ and $nft_I^{x', n'}$,
 - Determine the destination public chain and trigger the corresponding $vSC_B$
 
-In $vSC_B$,
+在 $vSC_B$ 中,
 
 - By $GID$ search, destroy $nft_{BC}^{I,n'}$ and generate $nft_{BC}^{B, n}$, $ redeem\_ex(\ GID,\ nft\_id\_on\ _B,\ address\_on\_I) \rightarrow EX_{issue}$
 
-The above process is triggered in an Extrinsic, which will generate an Extrinsic id, recorded as $EX_{redeem}$
+以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
 
-(iii) ***Unlock***. *redeemer* submits $EX_{redeem}$ to chain $B$, after $iSC_B$ verification, the correspondence of $GUID$ and $nft_B ^{x,n}$ will be recorded in $iSC_B$, which will also atomically trigger the method in $bSC_B$, returning $nft_B^{x,n}$ to the specified address.
+(iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
@@ -230,7 +221,7 @@ The above process is triggered in an Extrinsic, which will generate an Extrinsic
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg" alt="image-20191010113808729" style="zoom:50%;" />
 
-Explanation:
+解释：
 
 ###### *requester* related actions:
 
@@ -252,9 +243,9 @@ Explanation:
 
 ![image-20190927191635665](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8pswk9j3120050aac.jpg)
 
-Explanation:
+解释：
 
-*sender* calls the transfer method in $iSC_I$ on chain $I$ and sends $nft_I^{x',n'}$ to <em x-id= "3">receiver</em>
+在 chain $I$ 上 *sender* 调用 $iSC_I$ 中的 transfer方法，将 $nft_I^{x',n'}$ 发送给 *receiver*
 
 
 
@@ -280,9 +271,9 @@ Explanation:
 
 ## IV. Cross-chain NFT Standards
 
-In a cross-chain environment, NFT will appear in different blockchain networks, and its availability state may change constantly. Therefore, standards and solutions (such as Ethereum ERC20) in the original single-chain network cannot meet the requirements of NFT cross-chain standards.
+跨链环境下，NFT会出现在不同的区块链网络中，并且其可用状态可能不断变化，因此类似原来单链网络内的标准和方案(例如，Ethereum ERC20)，已经无法满足跨链NFT标准的需要。
 
-The identifiability and resolution issues of cross-chain Nft standards require new solutions and standards to address. Therefore, we introduce a analytic system based on the cross-chain certification of the pass to solve the positioning and analysis requirements of the cross-chain of the pass. Through the census system and the unique identifier in the domain, we can have the relationship between the certificate and the certificate of different domains. Map them up and identify the same and different between them.
+跨链NFT标准面临的识别性和解析问题，需要新的解决方案和标准来解决。因此我们引入一个基于通证跨链证明的解析系统来解决通证跨链时的定位和解析需求，通过通证解析系统和域内唯一标识，我们可以存在与不同域的通证之间的关联关系映射起来，并标识他们之间的相同与不同。
 
 ### A. Design Range
 
@@ -296,15 +287,15 @@ The identifiability and resolution issues of cross-chain Nft standards require n
 
 - Inter-parachain NFT Transfers
 
-  通过引入一个关联的SPREE模块来帮助在不同的平行链之间进行跨链转账。
+  Introducing an associated Spree module to help cross-chain transfers between different parallel chains are facilitated
 
-### B. 标准方案
+### B. Standard Solution Proposal
 
 基于跨链NFT协议的设计和方案基础，我们设计并提议了一个跨链NFT的标准提案，详细设计放在了 [RFC-0013 Cross-chain NFT Standards](./0013-darwinia-cross-chain-nft-standards.md)。
 
 
 
-## 参考
+## Reference
 
 [1] https://bitcoin.org/bitcoin.pdf
 
