@@ -171,7 +171,7 @@ GID0003: This NFT is originally created on Bridge Core, it is recorded as UNFO b
 GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ethereum, D_ERC1155, ?) trough Bridge Core, and then redeem reversely back. The 7th UNFO's External Local ID is unknow before redeem, but when redeeming, it will be updated to reveal it's value.
 <center>
   Figure: UNFO Set Table Sample
-</center> 备注:
+</center> Remark:
 
 1. The External Token ID may be in an unknown state, indicated by "?". This happens because the External Token ID generated on the target distribution chain is not notified and fed back to Bridge Core during the issue process. Without transaction proof information, UNFO had to set the value to be unknown. However, when some new redemption transactions occur later, the redemption transaction sent by the initiator to Bridge Core may contain the GID and External Token ID. At this time, the original unknown Token ID value can be updated to a known value by this transaction certificate.
 2. To maintain good consistency, within the life cycle of the NFT cross-chain flow that by passing Bridge Core, it is desirable to keep the mapping relationship between the External Chain ID and the (External Contact Address, External Token ID) unchanged. Parse the service and query the corresponding External Token ID in the historical UNFO record to maintain consistency.
