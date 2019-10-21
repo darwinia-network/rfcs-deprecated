@@ -37,8 +37,25 @@ desc: Darwinia Cross-chain NFT Standards
 ### B. 术语
 
 - **GID / Global ID**， 表示NFT在所有链中的全局唯一标识。适用范围：全局
-
 - **Local ID / Local token id**，表示NFT在不同的区块链中的token id. 适用范围：某一条区块链
+
+
+
+### C. 分类
+
+当我们讨论NFT跨链时，可以根据NFT所在基础设施的网络情况，分成几类：
+
+- 跨平行链(Polkadot内)
+
+当在平行链之间进行跨链时，例如在Polkadot网络中，因为有共享安全，共享运行时SPREE等设计，因此将通证解析系统放在中继链上时最合适的，因为通证跨平行链的消息会流经中继链，中继链可以通过在消息中继模块之外，嵌入一个收集模块，将通证跨链消息规范化统一收集之后，提供给通证解析服务。
+
+- 跨异构公链
+
+在异构跨链模式下，例如Ethereum和EOS之间，或者Ethereum和Tron之间，通证跨链一般通过跨链转接桥的方案等进行跨链，例如ACCS(HTLCs), XClaim, Parity Bridge(Mainet/Sidechain)，Darwinia Bridge Core等等。
+
+对基于Darwinia Bridge Core技术搭建的跨链转接桥，其NFT的跨链是通过在对手链上构建超额抵押的对称CBA，并利用Chain Relay技术来保证可赎回性和可解析性。Darwinia Bridge Core跟其他转接桥技术的区别有两点，1. 背书链也支持Chain Relay以更好的验证外链证明，而不需要担保质押 2. 通过在不同的公链上构建Darwinia Chain Relay，并利用一个Hub结构来优化利用这些基础设施，实现公链间的互联互通。设计细节可以参考RFC0010.
+
+本文所讨论的NFT跨链标准，主要集中的Polkadot内部，也就是平行链之间的NFT跨链标准，而对于公链间的跨链桥细节和外部公链上的NFT标准则不包含在本文范围。
 
 
 
@@ -138,7 +155,7 @@ polkadot://1/42/eth
 
 
 
-### . 数据请求格式
+### C. 数据请求格式
 
 如果有钱包/RPC客户端向Bridge Core请求NFT的拓扑信息，可以根据GID得到所有已知链的local ID信息：
 
@@ -161,19 +178,49 @@ polkadot://1/42/eth
 }
 ```
 
-### D. 解析系统
+### D. 基于UNFO的解析模块
 
 通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和可追踪性。由于在NFT跨链桥协议中，使用了UNFO来记录与NFT相关的跨链信息，协议和其他映射信息，因此我们可以利用这些证明信息，并引入NFT解析模块来记录、更新和解析UNFO及相关信息。
 
-通证解析系统还可以设计一个关联的SPREE模块(共享存储和共享运行时)，这样可以把解析模块当做一个共享的模块，开放给其他平行链来使用。SPREE模块还可以帮助在解析模块内定义约束条件，例如全局的通证总量，发行规则，并部署至SPREE模块，可以实现中继网络管辖范围的验证和可信互操作。
+在NFT通过Bridge Core 从B链转移至I链的过程中，Bridge Core会为每一个NFT分配一个GID，并将中间状态及其转移过程表达成UNFO，包括GID, (External Chain ID, External Contact Address, External Token ID), lock_script等信息。
 
-### E. 跨平行链转账
+这些UNFO记录集合会被归集在一个记录解析表里面，通过这个解析表，可以为跨链协议(e.g redeem)提供NFT通证解析服务，也可以为外部系统提供NFT解析服务。
+
+| UNFO | GID     | Externl Chain ID | External Contact Address | External Token ID | Lock_Script                  | Active Status |
+| ---- | ------- | ---------------- | ------------------------ | ----------------- | ---------------------------- | ------------- |
+| 1    | GID0001 | Ethereum         | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
+| 2    | GID0001 | Tron             | B_TRC721                 | ?                 | script_backing_redeem        | True          |
+| 3    | GID0002 | EOS              | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
+| 4    | GID0002 | EOS              | C_dGoods                 | 2.5.4             | script_ownership_contract    | True          |
+| 5    | GID0003 | Bridge Core      | None                     | None              | script_ownership_contract    | True          |
+| 6    | GID0004 | ETC              | ETC_ERC721               | 23                | script_issuing_burn_or_relay | False         |
+| 7    | GID0004 | Ethereum         | D_ERC1155                | 13                | script_backing_redeem        | False         |
+
+GID0001: This NFT is cross-chain transfered from (Ethereum, A_ERC721, 12) to (Tron, B_TRC721, ?) trough Bridge Core, Currently it is active on Tron.
+
+GID0002: This NFT is cross-chain transfered from (EOS, C_dGoods, 2.5.4) to an account Bridge Core,the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+
+GID0003: This NFT is originally created on Bridge Core, it is recorded as UNFO because the golobal identifier is generated in the UNFO module, the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+
+GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ethereum, D_ERC1155, ?) trough Bridge Core, and then redeem reversely back. The 7th UNFO's External Local ID is unknow before redeem, but when redeeming, it will be updated to reveal it's value.
+
+
+<center>Figure: UNFO Set Table Sample</center>
+
+备注: 
+
+1. External Token ID有可能是未知状态，用"?"表示，之所以会出现这种情况，是因为在issue过程中, 目标发行链上生成的External Token ID 不会通知和反馈给Bridge Core，没有相关的交易证明信息，UNFO也就只好设置该值为未知。但是，当后面某些新的赎回交易发生时，发起者发送给Bridge Core的赎回交易有可能会包含GID和External Token ID，此时可以通过这个交易证明，更新原来未知的External Token ID值为已知值。
+2. 为了保持良好的一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过上面提到的解析服务，至历史UNFO记录里面查询相应的External Token ID，以保持一致性。
+
+### E. 跨平行链操作
 
 在稍后的III章节，我们将会假设转账是发生在同一条链上的，关于如何处理跨链间的转账，我们将会使用一个关联的SPREE模块来解决(参考Polkadot相关方案[3]实现)。
 
+通证解析系统还可以设计一个关联的SPREE模块(共享存储和共享运行时)，这样可以把解析模块当做一个共享的模块，开放给其他平行链来使用。SPREE模块还可以帮助在解析模块内定义约束条件，例如全局的通证总量，发行规则，并部署至SPREE模块，可以实现中继网络管辖范围的验证和可信互操作。
 
 
-## III. NFT Standard on Polkadot/Darwinia
+
+## IV. NFT Standard on Polkadot/Darwinia
 
 A cross-chain non fungible token standard is required for blockchains to transfer assets across the ecosystem and for clients (e.g. wallet, browser extension) to offer unified support of the token that provided by different chains.
 

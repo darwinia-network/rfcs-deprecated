@@ -144,38 +144,28 @@ struct UNFO {
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
-#### B.III. 基于UNFO的NFT映射和解析服务
+#### B.III. 基于UNFO的NFT映射和ID一致性
 
-通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和证明服务。
+Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安全即可，但是NFT对可识别性有更高的要求，因此需要再跨链时更好的维护NFT CBA和原生资产的一一映射，并保持ID的一致性，包括GID和External Locol ID。
 
-在NFT通过Bridge Core 从B链转移至I链的过程中，Bridge Core会为每一个NFT分配一个GID，并将中间状态及其转移过程表达成UNFO，包括GID, (External Chain ID, External Contact Address, External Token ID), lock_script等信息。
+| UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                  | Active Status |
+| ---- | ------- | ----------------- | ------------------------ | ----------------- | ---------------------------- | ------------- |
+| 1    | GID0001 | Ethereum          | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
+| 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem        | True          |
+| 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 
-这些UNFO记录集合会被归集在一个记录解析表里面，通过这个解析表，可以为跨链协议(e.g redeem)提供NFT通证解析服务，也可以为外部系统提供NFT解析服务。
+<center>基于UNFO的映射表示例</center>
+假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
 
-|  UNFO  |  GID  | Externl Chain ID | External Contact Address | External Token ID | Lock_Script | Active Status |
-|  ----  | ----  |  ----  |  ----  |  ----  |  ----  |  ----  |
-| 1 | GID0001 | Ethereum | A_ERC721 | 12 | script_issuing_burn_or_relay | False |
-| 2 | GID0001 | Tron | B_TRC721 | ? | script_backing_redeem | True |
-| 3 | GID0002 | EOS | C_dGoods | 2.5.4 | script_issuing_burn_or_relay | False |
-| 4 | GID0002 | EOS | C_dGoods | 2.5.4 | script_ownership_contract | True |
-| 5 | GID0003 | Bridge Core | None | None | script_ownership_contract | True |
-| 6 | GID0004 | ETC | ETC_ERC721 | 23 | script_issuing_burn_or_relay | False |
-| 7 | GID0004 | Ethereum | D_ERC1155 | 13 | script_backing_redeem | False |
+>  nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
 
-GID0001: This NFT is cross-chain transfered from (Ethereum, A_ERC721, 12) to (Tron, B_TRC721, ?) trough Bridge Core, Currently it is active on Tron.
+在没有NFT的跨链映射表的情况下，
 
-GID0002: This NFT is cross-chain transfered from (EOS, C_dGoods, 2.5.4) to an account Bridge Core,the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+> Alice在跨链桥M(A->B)中，将nft(A, X, 1) 变为 nft(B, Y, 2) ；又通过跨链桥N(B->C)，将nft(B, Y, 2) 变为 nft(C, Z, 3)。之后，当Alice想继续使用跨链桥M将C链上的nft 跨链去 A链的话，因为没有跨链映射表查询该NFT在A中的ID信息，跨链桥M会将 nft(C, Z, 3) 识别为新的NFT CBA，这样很可能在跨回A链时，将不再是nft(A, X, 1)，而是nft(A, X, 5). NFT就丢失了自己的可识别性和ID一致性，会给协议和赎回过程带来额外的复杂性和混乱。
 
-GID0003: This NFT is originally created on Bridge Core, it is recorded as UNFO because the golobal identifier is generated in the UNFO module, the script_ownership_contract is linking to an ownership managemetn contract on Bridge Core.
+为了尽可能减少丢失NFT可识别性对用户造成的潜在资产损失，如果NFT在Bridge Core连接的网络之内跨链，则用户可以获取到Bridge Core上某个NFT当前的基于UNFO的NFT映射表，协议将可以约束用户跨链回A链的NFT需要遵循ID一致性和可识别性。这样，至少在Darwinia Bridge Core系统内，NFT可保证可识别性不被破坏。
 
-GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ethereum, D_ERC1155, ?) trough Bridge Core, and then redeem reversely back. The 7th UNFO's External Local ID is unknow before redeem, but when redeeming, it will be updated to reveal it's value.
-
-
-<center>Figure: UNFO Set Table Sample</center>
-备注: 
-
-1. External Token ID有可能是未知状态，用"?"表示，之所以会出现这种情况，是因为在issue过程中, 目标发行链上生成的External Token ID 不会通知和反馈给Bridge Core，没有相关的交易证明信息，UNFO也就只好设置该值为未知。但是，当后面某些新的赎回交易发生时，发起者发送给Bridge Core的赎回交易有可能会包含GID和External Token ID，此时可以通过这个交易证明，更新原来未知的External Token ID值为已知值。
-2. 为了保持良好的一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过上面提到的解析服务，至历史UNFO记录里面查询相应的External Token ID，以保持一致性。
+为了保持良好的ID一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过基于UNFO的解析服务，至UNFO映射表里面查询相应的External Token ID，以保持一致性。在RFC-0013章节III.D中，我们还将详细介绍NFT解析模块。
 
 ### C. 初步实现方案
 
