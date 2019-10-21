@@ -169,49 +169,49 @@ Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安
 
 ### C. Preliminary Implementation Plan
 
-场景同章节II中的描述。依然需要实现三种 protocol：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
+The scenario is the same as described in Chapter II. Still need to implement three protocols：*Issue, Transfer, Redeem*. Also to simplify the model, the details about fees will not be discussed here.
 
 #### Protocol: Issue
 
-(i) ***锁定***。*requester* 将 chain $B$上的NFT资产 $nft_B^{n,x}$ 锁定在 $bSC_B$ 中，同时声明目的地公链 chain *I* 以及自己在chain $I$ 上的地址；这一步将产生交易$T_B^{lock}$
+(i) ***lock***. *requester* lock the NFT asset $nft_B^{n,x}$ on chain $B$ in $bSC_B$ and declare the destination public chain *I* and the address of itself on the chain $I$; this step will generate the transaction $T_B^{lock}$
 
-(ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
+(ii) ***Issue in Bridge Core***. *requester* will lock the transaction $Tb^{lock}$ to Bridge Core, and after verified by the corresponding chain relay, it will trigger $vSC_B$ in $vSC_B$:
 
 - Generate new $GID$ and $nft_{BC}^{B,n}$ , and record the relationship between $GID$ and $nft_{BC}^{B,n}$
 - And trigger $vSC_I$
 
-在 $vSC_I$ 中：
+In $vSC_I$：
 
 -  Destroy $nft_{BC}^{B,n}$, issue $nft_{BC}^{I,?}$, $issue\_{ex}(\ GID,\ address\_on\_I) \rightarrow EX_{ Issue}$
 
-(iii) ***发行***。*requester* 将 $EX_{issue}$ 提交至 chain $I$ , 经过chain $I$ 上的chain relay 验证通过后，即会在$iSC_I$ 中增发新的NFT: $nft_I^{x', n'}$， 并记录 $GID$ 和 $nft_I^{x', n'}$的关系， 且将所有权交给 *requester* 在chain *I* 上的地址
+(iii) ***issue***. *requester* submit $EX_{issue}$ to chain $I$ , which will issue New NFT: $nft_I^{x', n'}$ in $iSC_I$ after passing the chain relay verification on chain $I$ , and record the relationship between $GID$ and $nft_I^{x', n'}$, and pass ownership to *requester* address on chain *I*
 
-注: 对于外部区块链上的$iSC$来说，在发行时，也需要在外部区块链上，将全局ID和本地ID的映射记录下来，因为后面redeem的时候，需要使用这个映射关系来完成redeem.
+Note: For $iSC$ on the external blockchain, the global ID and local ID mappings need to be recorded on the external blockchain at the time of release, because this mapping is required to complete redeem.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznhszi8j30pz0elabd.jpg" alt="chain-relay-framework-1" style="zoom:50%;" />
 
 #### Protocol: Transfer
 
-(i) ***转移***。*sender* 在 $I$ 上把 $nft_I^{x',n'}$ 在  $iSC_I$ 中，把所有权转移给 *receiver*，参考ERC721.
+(i) ***transfer***. *sender* put $nft_I^{x',n'}$ on $I$ in $iSC_I$ and transfer ownership to *receiver*, refer to ERC721.
 
-(ii) ***见证***。当 $nft_I^{x',n'}$ 在  $iSC_I$ 中的所有权发生了转移时，$iSC_I$ 和 $bSC_I$ 都应当觉察。此时，当 *sender* 再想把 $nft_I^{x',n'}$ 赎回时需要先将其锁定在 $bSC_I$ 中，此时 $bSC_I$ 将不会允许该操作成功。
+(ii) ***witness***.When the ownership of $nft_I^{x',n'}$ in $iSC_I$ has been transferred, both $iSC_I$ and $bSC_I$ should be aware. At this point, when *sender* wants to redeem $nft_I^{x',n'}$, it needs to be locked in $bSC_I$ first, then $ bSC_I$ will not allow the operation to succeed.
 
 #### Protocol: Redeem
 
-(i) ***锁定***。 *redeemer* 将 chain $I$ 上的NFT资产 $nft_I^{x', n'}$ 锁定在 $bSC_I$ 后 (如果有对应的GID，锁定时需声明 $GID$)，同时声明目的地公链chain $B$ 以及自己在 chain $B$ 上的地址；$bSC_I$ 会原子地 在 $iSC_I$ 中确认 $GUID$ 的正确性。这一步将产生交易$T_I^{redeem}$。$lock\_I(nft\_id\_on\_I,\ GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
+(i) ***lock***. *redeemer* locks the NFT asset $nft_I^{x', n'}$ on chain $I$ in $bSC_I$ (if there is a corresponding GID, it needs to declare $GID$ when locked)), declare the destination public chain $B$ and its own address on the chain $B$; $bSC_I$ will atomically confirm the correctness of $GUID$ in $iSC_I$. This step will generate the transaction $T_I^{redeem}$. $lock\_I(nft\_id\_on\_I,\GID,\ address\_on\_B) \rightarrow T_I^{redeem}$
 
-(ii) ***Bridge Core上解锁***。 *redeemer* 将 $T_I^{redeem}$ 提交至 $vSC_I$ 并在chain relay中验证通过后，会在 $vSC_I$ 中：
+(ii) ***Unlock on Bridge Core***. *redeemer* submits $T_I^{redeem}$ to $vSC_I$ and validates it in the chain relay, in $vSC_I$:
 
 - Record the correspondence between $GID$ and $nft_I^{x', n'}$,
 - Determine the destination public chain and trigger the corresponding $vSC_B$
 
-在 $vSC_B$ 中,
+In $vSC_B$,
 
 - By $GID$ search, destroy $nft_{BC}^{I,n'}$ and generate $nft_{BC}^{B, n}$, $ redeem\_ex(\ GID,\ nft\_id\_on\ _B,\ address\_on\_I) \rightarrow EX_{issue}$
 
-以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
+The above process is triggered in an Extrinsic, which will generate an Extrinsic id, recorded as $EX_{redeem}$
 
-(iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。
+(iii) ***Unlock***. *redeemer* submits $EX_{redeem}$ to chain $B$, after $iSC_B$ verification, the correspondence of $GUID$ and $nft_B ^{x,n}$ will be recorded in $iSC_B$, which will also atomically trigger the method in $bSC_B$, returning $nft_B^{x,n}$ to the specified address.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
@@ -221,7 +221,7 @@ Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg" alt="image-20191010113808729" style="zoom:50%;" />
 
-解释：
+Explanation:
 
 ###### *requester* related actions:
 
@@ -243,9 +243,9 @@ Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安
 
 ![image-20190927191635665](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8pswk9j3120050aac.jpg)
 
-解释：
+Explanation:
 
-在 chain $I$ 上 *sender* 调用 $iSC_I$ 中的 transfer方法，将 $nft_I^{x',n'}$ 发送给 *receiver*
+*sender* calls the transfer method in $iSC_I$ on chain $I$ and sends $nft_I^{x',n'}$ to *receiver*
 
 
 
@@ -271,15 +271,15 @@ Explanation:
 
 ## IV. Cross-chain NFT Standards
 
-跨链环境下，NFT会出现在不同的区块链网络中，并且其可用状态可能不断变化，因此类似原来单链网络内的标准和方案(例如，Ethereum ERC20)，已经无法满足跨链NFT标准的需要。
+In a cross-chain environment, NFT will appear in different blockchain networks, and its availability state may change constantly. Therefore, standards and solutions (such as Ethereum ERC20) in the original single-chain network cannot meet the requirements of NFT cross-chain standards.
 
-跨链NFT标准面临的识别性和解析问题，需要新的解决方案和标准来解决。因此我们引入一个基于通证跨链证明的解析系统来解决通证跨链时的定位和解析需求，通过通证解析系统和域内唯一标识，我们可以存在与不同域的通证之间的关联关系映射起来，并标识他们之间的相同与不同。
+The identifiability and resolution issues of cross-chain Nft standards require new solutions and standards to address. Therefore, we introduce a analytic system based on the cross-chain token certification to meet the positioning and resolution requirements. Through token resolution system and the unique identifier in the domain, we can map the relationship of tokens in different domains, and identify the different between them.
 
 ### A. Design Range
 
 - Globally unique identifier and external local identity specification
 
-  In order to standardize the different standard pass identifiers, to provide identification and analysis methods, coordinate and interface with existing standards, and meet the standard requirements of community infrastructure construction. The identification identifier is divided into a global unique identifier and an external local identifier.
+  In order to standardize the different token identifiers, to provide identification and analysis methods, to coordinate and interface with existing standards, and to meet the standard requirements of community infrastructure construction, the identifiers are divided into a global unique identifier and an external local identifier.
 
 - NFT Resolution system
 
@@ -291,7 +291,7 @@ Explanation:
 
 ### B. Standard Solution Proposal
 
-基于跨链NFT协议的设计和方案基础，我们设计并提议了一个跨链NFT的标准提案，详细设计放在了 [RFC-0013 Cross-chain NFT Standards](./0013-darwinia-cross-chain-nft-standards.md)。
+Based on the design and solution basis of the NFT cross-chain protocol, we have designed and proposed a standard proposal for NFT cross-chain, detailed design is placed in [RFC-0013 Cross-chain NFT Standards](./0013-darwinia-cross-chain-nft-standards. md).
 
 
 
