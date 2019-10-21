@@ -178,11 +178,11 @@ GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ether
 
 ### C. Preliminary Implementation Plan
 
-The scenario is the same as described in Chapter II. Still need to implement three protocols：*Issue, Transfer, Redeem*. 同样为了简化模型，这里将不会讨论手续费相关细节。
+The scenario is the same as described in Chapter II. Still need to implement three protocols：*Issue, Transfer, Redeem*. Also to simplify the model, the details about fees will not be discussed here.
 
 #### Protocol: Issue
 
-(i) ***锁定***。*requester* 将 chain $B$上的NFT资产 $nft_B^{n,x}$ 锁定在 $bSC_B$ 中，同时声明目的地公链 chain *I* 以及自己在chain $I$ 上的地址；这一步将产生交易$T_B^{lock}$
+(i) ***lock***. *requester* lock the NFT asset $nft_B^{n,x}$ on chain $B$ in $bSC_B$ and declare the destination public chain *I* and the address of itself on the chain $I$; this step will generate the transaction $T_B^{lock}$
 
 (ii) ***Bridge Core上发行***。 *requester*  将锁定交易 $T_B^{lock}$ 提交至 Bridge Core, 对应的chain relay验证通过后，即 触发 $vSC_B$ , 在 $vSC_B$ 中：
 
