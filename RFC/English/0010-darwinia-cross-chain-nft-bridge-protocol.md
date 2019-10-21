@@ -220,7 +220,7 @@ In $vSC_B$,
 
 The above process is triggered in an Extrinsic, which will generate an Extrinsic id, recorded as $EX_{redeem}$
 
-(iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。
+(iii) ***Unlock***. *redeemer* submits $EX_{redeem}$ to chain $B$, after $iSC_B$ verification, the correspondence of $GUID$ and $nft_B ^{x,n}$ will be recorded in $iSC_B$, which will also atomically trigger the method in $bSC_B$, returning $nft_B^{x,n}$ to the specified address.
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7szni9t0lj30r70elgn2.jpg" alt="chain-relay-framework-2" style="zoom:50%;" />
 
@@ -230,11 +230,11 @@ The above process is triggered in an Extrinsic, which will generate an Extrinsic
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7sznio88rj30uc0j0aca.jpg" alt="image-20191010113808729" style="zoom:50%;" />
 
-解释：
+Explanation:
 
-###### *requester* 相关的操作：
+###### *requester* related actions:
 
-- **lockB**($nft_B^{x,n}$, cond):   发生在chain $B$ 内。将$nft_B^{x,n}$ 锁定在 $bSC_B$ 中，并声明 *requester* 在 chain $I$ 上的地址，这个操作对应交易 $T_B^{lock}$
+- **lockB**($nft_B^{x,n}$, cond): Occurs in the chain $B$. Lock $nft_B^{x,n}$ in $bSC_B$ and declare the *requester* address on chain $I$, this operation corresponds to the transaction $T_B^ {lock}$
 
 - **verifyBOp**(lockB, $T_B^{lock}$, $\Delta_{lock}$) $\rightarrow T$ :    发生在Bridge Core内。*requester*将 $T_B^{lock}$ 提交至 Bridge Core中的 $vSC_B$ 进行验证，如果 $T_B^{lock}$ 真实地在 chain $B$ 上发生过并且满足最小需要延时 $\Delta_{lock}$，即返回结果T(True)，否则返回F(False).
 
