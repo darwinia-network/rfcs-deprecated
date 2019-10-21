@@ -24,7 +24,7 @@ desc: Darwinia Cross-chain NFT Standards
 
 
 
-## II. 标准方案
+## II. 介绍
 
 ### A. 目标
 
@@ -42,7 +42,9 @@ desc: Darwinia Cross-chain NFT Standards
 
 
 
-### C. 全局唯一标识GID和Local ID
+## III. 跨链共享标准
+
+### A. 全局唯一标识GID和Local ID
 
 鉴于NFT跨链的目标，本方案会在跨链时为NFT分配一个唯一个全局ID，并且在跨链桥内部保留其在外部链上的local token id，达到可识别、可追踪、访问友好的目标。
 
@@ -98,7 +100,7 @@ GID 作为 NFT的全局标识，需要保证唯一性。因此不同的NFT在跨
 
 通过这种编码方式，既可以清晰地寻址到 local token id，又节省了字节数，提高了传输效率。
 
-### D. Utlilising Fungible/Non-fungible assets on Polkadot
+### B. Utlilising Fungible/Non-fungible assets on Polkadot
 
 基于已有的polkadot内部fungible asset的标识和使用方案[3]进行扩展，我们可以使用如下一行URI格式的标识方式，为钱包/ RPC客户端的访问提供便利：
 
@@ -136,7 +138,7 @@ polkadot://1/42/eth
 
 
 
-### E. 数据请求格式
+### . 数据请求格式
 
 如果有钱包/RPC客户端向Bridge Core请求NFT的拓扑信息，可以根据GID得到所有已知链的local ID信息：
 
@@ -159,25 +161,39 @@ polkadot://1/42/eth
 }
 ```
 
-### F. 解析系统
+### D. 解析系统
 
-通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和可追踪性。
+通证解析模块是NFT cross-chain协议内嵌的一个模块，用于在 *Issuing chain* 或者其连接的中继链上记录和解析当前通证在中继链范围内的全局状态，并规范化处理成解析格式的方式，来为跨链网络提供通证解析查询和可追踪性。由于在NFT跨链桥协议中，使用了UNFO来记录与NFT相关的跨链信息，协议和其他映射信息，因此我们可以利用这些证明信息，并引入NFT解析模块来记录、更新和解析UNFO及相关信息。
+
+通证解析系统还可以设计一个关联的SPREE模块(共享存储和共享运行时)，这样可以把解析模块当做一个共享的模块，开放给其他平行链来使用。SPREE模块还可以帮助在解析模块内定义约束条件，例如全局的通证总量，发行规则，并部署至SPREE模块，可以实现中继网络管辖范围的验证和可信互操作。
+
+### E. 跨平行链转账
+
+在稍后的III章节，我们将会假设转账是发生在同一条链上的，关于如何处理跨链间的转账，我们将会使用一个关联的SPREE模块来解决(参考Polkadot相关方案[3]实现)。
 
 
 
-### G. 所有权管理
+## III. NFT Standard on Polkadot/Darwinia
 
-[WIP]
+A cross-chain non fungible token standard is required for blockchains to transfer assets across the ecosystem and for clients (e.g. wallet, browser extension) to offer unified support of the token that provided by different chains.
 
 将参考以太坊中的ERC721和ERC1155标准。所有权管理模块或者合约将直接使用GID作为NFT通证的ID，而GID是由UNFO模块中负责管理和生成的，这一点跟ERC721不同，因为在ERC721中，NFT合约负责管理和生成NFT 的Token ID。
 
+NFT标准主要由几部分组成，GID管理、资源描述、所有权管理、扩展标准。
 
+### A. NFT Descriptions
 
-### H. Inter-parachain NFT Transfers
+NFT descriptions offers a universal way to describe, display the details about a token. This information may not be stored on-chain to reduce usage of on-chain storages. A centralized or decentralized token registry may be used to discovery the token description, which is out of the scope here.
+
+### B. 所有权管理
 
 [WIP]
 
-通过引入一个关联的SPREE模块来帮助在不同的平行链之间进行跨链转账。(参考Polkadot相关方案[3]实现。)
+### C. 规范
+
+[WIP]
+
+
 
 ### 参考
 
