@@ -212,13 +212,13 @@ Note: For $iSC$ on the external blockchain, the global ID and local ID mappings 
 (ii) ***Unlock on Bridge Core***. *redeemer* submits $T_I^{redeem}$ to $vSC_I$ and validates it in the chain relay, in $vSC_I$:
 
 - Record the correspondence between $GID$ and $nft_I^{x', n'}$,
-- 判断目的地公链并触发相应的 $vSC_B$ ,
+- Determine the destination public chain and trigger the corresponding $vSC_B$
 
-在 $vSC_B$ 中,
+In $vSC_B$,
 
-- 通过 $GID$检索，销毁 $nft_{BC}^{I,n'}$ ，产生 $nft_{BC}^{B, n}$ ，$ redeem\_ex(\ GID,\ nft\_id\_on\_B,\ address\_on\_I) \rightarrow EX_{issue}$
+- By $GID$ search, destroy $nft_{BC}^{I,n'}$ and generate $nft_{BC}^{B, n}$, $ redeem\_ex(\ GID,\ nft\_id\_on\ _B,\ address\_on\_I) \rightarrow EX_{issue}$
 
-以上过程均在一次Extrinsic内触发，将会产生一笔Extrinsic id，记录为 $EX_{redeem}$
+The above process is triggered in an Extrinsic, which will generate an Extrinsic id, recorded as $EX_{redeem}$
 
 (iii) ***解锁***。 *redeemer* 将 $EX_{redeem}$ 提交给 chain $B$ ， 经过$iSC_B$ 验证通过后，在 $iSC_B$ 中会记录 $GUID$ 和 $nft_B^{x,n}$ 的对应关系， 同时会原子地触发 $bSC_B$ 中的方法，将 $nft_B^{x,n}$ 还给指定的地址。
 
