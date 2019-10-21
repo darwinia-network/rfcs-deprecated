@@ -236,11 +236,11 @@ Explanation:
 
 - **lockB**($nft_B^{x,n}$, cond): Occurs in the chain $B$. Lock $nft_B^{x,n}$ in $bSC_B$ and declare the *requester* address on chain $I$, this operation corresponds to the transaction $T_B^ {lock}$
 
-- **verifyBOp**(lockB, $T_B^{lock}$, $\Delta_{lock}$) $\rightarrow T$ :    发生在Bridge Core内。*requester*将 $T_B^{lock}$ 提交至 Bridge Core中的 $vSC_B$ 进行验证，如果 $T_B^{lock}$ 真实地在 chain $B$ 上发生过并且满足最小需要延时 $\Delta_{lock}$，即返回结果T(True)，否则返回F(False).
+- **verifyBOp**(lockB, $T_B^{lock}$, $\Delta_{lock}$) $\rightarrow T$ : Occurs within Bridge Core. *requester* submit $T_B^{lock}$ to $vSC_B$ in Bridge Core for verification, if $T_B^{lock}$ actually occurs on chain $B$ and meets the minimum required delay of $\Delta_{lock}$, it returns the result T(True), otherwise returns F(False).
 
-  如果结果为T，则在 $vSC_B$ 中自动触发 newGid($nft_B^{x,n}$)，会产生新的GID，以及 $nft_B^{x,n}$ 在 Bridge Core内的镜像 $nft_{BC}^{B,n}$ ，并建立GID和 $nft_{BC}^{B,n}$ 的对应关系
+  If the result is T, then newGid($nft_B^{x,n}$) is automatically triggered in $vSC_B$, a new GID and the mirror of $nft_B^{x,n}$ in Bridge Core $nft_ {BC}^{B,n}$ are generated, and establish the correspondence between GID and $nft_{BC}^{B,n}$
 
-- **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ :  发生在 chain $I$ 内。*requester* 将 $EX_{issue}$ 提交至chain $I$ 的 $iSC_I$ 内，如果$iSC_I$ 验证 $EX_{issue}$ 的真实性即返回T，否则返回F。验证通过后，即通过调用issue方法，发行 $nft_I^{x',n'}$ 到 *requester* 在 chain $I$ 的地址上。
+- **verifyBCOp**(trigger, $EX_{issue}$, $\Delta_{trigger}$) $\rightarrow T$ : Occurs in chain $I$. *requester* submit $EX_{issue}$ to $iSC_I$ in chain $I$, return T if $iSC_I$ verifies the authenticity of $EX_{issue}$, otherwise return F. After verification, issue  $nft_I^{x',n'}$ to *requester* at the address of chain $I$.
 
 ###### *validator* 相关操作：
 
