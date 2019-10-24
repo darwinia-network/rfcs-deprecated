@@ -267,7 +267,7 @@ FlyClient提供了super light client的方案，但是Chain Relay需要在区块
 
   
 
-- On-chain Crypto Verfication Support
+- On-chain Crypto Verification Support
 
   Chain Relay需要对外部链上的交易证明进行验证，但是由于是在不同的链上，Chain Relay所在链可能不支持外部链交易所需的加密库，例如Ethereum 1.0目前还不支持BLS算法。因此如果需要广泛的支持不同的公链，需要考虑Chain Relay运行链是否支持相应的加密库。
 
