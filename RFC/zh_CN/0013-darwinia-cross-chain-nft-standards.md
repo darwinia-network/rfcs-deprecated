@@ -206,7 +206,6 @@ GID0004: This NFT is cross-chain transfered from (ETC, ETC_ERC721, 23) to (Ether
 
 
 <center>Figure: UNFO Set Table Sample</center>
-
 备注: 
 
 1. External Token ID有可能是未知状态，用"?"表示，之所以会出现这种情况，是因为在issue过程中, 目标发行链上生成的External Token ID 不会通知和反馈给Bridge Core，没有相关的交易证明信息，UNFO也就只好设置该值为未知。但是，当后面某些新的赎回交易发生时，发起者发送给Bridge Core的赎回交易有可能会包含GID和External Token ID，此时可以通过这个交易证明，更新原来未知的External Token ID值为已知值。
@@ -249,3 +248,7 @@ NFT descriptions offers a universal way to describe, display the details about a
 [2] https://ipld.io/
 
 [3] https://hackmd.io/gQKQGf42TeOODid3hM4_1w
+
+[4] https://en.wikipedia.org/wiki/Unique_identifier
+[5] https://en.wikipedia.org/wiki/Identifiers.org#Comparison_with_other_URI_systems
+[6] https://elixir-europe.org/platforms/interoperability
