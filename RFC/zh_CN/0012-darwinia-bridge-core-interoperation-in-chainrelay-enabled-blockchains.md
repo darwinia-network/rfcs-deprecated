@@ -297,3 +297,6 @@ FlyClient提供了super light client的方案，但是Chain Relay需要在区块
 8. https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2016-May/012715.html
 9. [Fiat Shamir heuristic](https://en.wikipedia.org/wiki/Fiat–Shamir_heuristic)
 10. https://medium.com/blockchain-research-newsletter/blockchain-research-newsletter-3-nipopow-and-flyclient-ac202f7624a7
+11. https://blog.kyber.network/waterloo-a-decentralized-practical-bridge-between-eos-and-ethereum-1c230ac65524
+12. https://medium.com/@loiluu/peacerelay-connecting-the-many-ethereum-blockchains-22605c300ad3
+13. https://steemit.com/eos/@attic-lab/eos-io-consensus-algorithm
