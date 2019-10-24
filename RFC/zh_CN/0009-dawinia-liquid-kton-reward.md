@@ -1,7 +1,7 @@
 ---
 rfc: 9
 title: 0009-dawinia-liquid-kton-reward
-status: Draft
+status: Abandoned
 desc: 给流动KTON分发RING收益
 ---
 
