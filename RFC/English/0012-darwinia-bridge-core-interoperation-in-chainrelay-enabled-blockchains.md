@@ -1,9 +1,8 @@
 ---
-Rfc: 12
-Title: 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains
-Status: Draft
-Desc: Darwinia Bridge Core - Interoperation in ChainRelay Enabled Blockchains
-
+rfc: 12
+title: 0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains
+status: Draft
+desc: Darwinia Bridge Core - Interoperation in ChainRelay Enabled Blockchains
 ---
 
 # Darwinia Bridge Core: Interoperation in ChainRelay Enabled Blockchains
@@ -12,35 +11,39 @@ Desc: Darwinia Bridge Core - Interoperation in ChainRelay Enabled Blockchains
 
 ## I. Abstract
 
-XClaim (Cross Claim) proposes a universal, efficient and low-cost cross-chain framework for the shortcomings of ACCS, using Cryptocurrency-Bakced Assets (CBAs). 
+XClaim[5] 针对 ACCS 的缺点，设计了通用的、高效低成本的跨链框架，并提出了Cryptocurrency-Bakced Assets (CBAs)的概念。其设计主要分成三个部分：
 
-Although XClaim solves the shortcomings of ACCS to some extent, it also has its own limitations: it is only valid for Fungible Token, and. There is currently no general framework for cross-chain circulation of NFT. And Vault's collateral design in the XClaim solution may also have a problem of insufficient yield.
+- 提出的CBA概念对跨链资产和原生资产的关系做了清晰的概括，是原生资产在另外一个区块链网络中存在形式的精简表达。
+- 在发行链(Issuing Blockchain)一端，通过借助Chain Relay对另外一个链上的交易证明进行存在性和共识性的直接验证，而无需信任第三方。
+- 在背书链(Backing Blockchain)一端，通过引入Vault、质押物(Collateral)和喂价等经济机制，对赎回过程的安全性实现了理性经济假设下的保证。由于存在质押物和喂价机制的约束，所以只能支持流动性较好的Fungible Token。
 
-This article describes how to remove the Vault role and its collateral by introducing a chainRelay on the Backing Blockchain.
+XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身的局限性：只针对Fungible Token有效，不支持NFT和其他流动性较差无法喂价和平仓的Fungible Token。此外，XClaim方案中因为Vault的质押物在跨链资产赎回之前都是锁定的，导致存在较高的质押成本，抵押物可能存在收益率不足的问题。
+
+针对XClaim的以上问题，本文在保留CBA概念和大部分发行链的设计的同时，将背书链一端进行重新设计，增加对Backing Blockchain引入更多合理假设，即支持智能合约和Chain Relay(非BTC)，在背书链一端引入Chain Relay来验证发行链的交易，同时对背书锁定资产的赎回进行链上合约化的约束。通过这样的新方式，去除Vault、流动性质押、喂价等设计和模块，实现了对更广泛的Token的支持，包括NFT和流动性不好的Fungible Token。
 
 
 
 ## II. Introduction
 
-For the token exchange on different blockchains, although centralized exchanges can help to implement, such services require a high degree of trust, and are prone to problems such as main actions and single points of failure. With the advent of a number of excellent cross-chain projects such as Cosmos and Polkadot, decentralized token circulation protocols/schemes that are architected on cross-chain infrastructure have also become important research content.
+对于不同区块链上的token交换，目前虽然中心化交易所可以帮助执行，但是这样的服务需要高度的信任，且易发生主动作恶、单点故障等问题。随着Cosmos、Polkadot这样一批优秀的跨链项目的落地，架构在跨链基础设施之上的去中心化token流通协议/方案也成为重要的研究内容。
 
-In the existing scheme, atomic cross-chain swaps (ACCS) is the first feasible solution, but due to its low cross-chain efficiency and high cost, there are not many practical scenarios. Subsequently, XClaim (Cross Claim) proposed a general, efficient and low-cost cross-chain framework for the shortcomings of ACCS, using Cryptocurrency-Bakced Assets (CBAs).
+在已有的方案中，atomic cross-chain swaps (ACCS) 是最早提出的可行性方案，但由于其跨链效率低、成本高，实际使用场景并不多。随后，XClaim (Cross Claim) 针对 ACCS 的缺点，提出了通用的、高效低成本的跨链框架，使用了Cryptocurrency-Bakced Assets (CBAs).
 
-Although XClaim solves the shortcomings of ACCS to some extent, it also has its own limitations: it is only valid for Fungible Token, and. There is currently no general framework for cross-chain circulation of NFT. In this paper, the dual-chain cross-over is taken as an example. By introducing more assumptions to the Backing Blockchain, that is, the Backing Blockchain supports smart contracts, an improved universal XClaim solution based on dual Chain Relay (both for Fungible Token and NFT) is proposed.
+XClaim 虽然某种程度上解决了 ACCS 的缺点，但是也存在其自身的局限性：只针对Fungible Token有效，并且。目前针对NFT的跨链流通还没有通用框架。本文以双链互跨为例，通过对Backing Blockchain引入更多假设，即假设Backing Blockchain支持智能合约，提出基于双Chain Relay的改进版通用XClaim方案（同时适用于Fungible Token和NFT）。
 
-The change plan will show the design ideas and process realization of the Two chainRelay Model. [XClaim] (https://eprint.iacr.org/2018/643.pdf) cross-chain solution can guarantee the cross-chain security operation of NFT in most occasions, but still can not guarantee the sharp price of the certificate assets Robustness and sustainability of the entire system when fluctuating.
+该方案将展示Two chainRelay Model的设计思路和过程实现。[XClaim](https://eprint.iacr.org/2018/643.pdf)跨链方案已经可以保证了在大部分场合下的NFT的跨链安全操作，但是依然无法保证通证资产价格产生剧烈波动时，整个系统的鲁棒性和可持续性。
 
-At the same time, this article will also focus on the implementation cost of chainRelay and its improvement program. The current improvement ideas include two solutions. First, by submitting *block headers* in batches, or by constructing *merkle tree* for *block headers*. Compression costs, second, by using zero-knowledge proof techniques, reduce the cost of uploading *block headers* and increase the speed of verification transactions on the chain.							
+同时，本文还将着重分析chainRelay的实现成本和其改进方案，目前改进思路包括两个方案的探讨，其一，通过批量提交*block headers*，或对*block headers*构建*merkle tree*的方式压缩成本，其二，通过借助零知识证明的技术，将上传*block headers*成本降低，并提高链上验证交易的速度。
 
 
 
 ## III. Overview
 
-In this chapter, we first review and define some of the concepts in XClaim that are relevant to this article, as well as the models of the system and the roles involved.
+在这一章节，我们首先回顾和定义一些XClaim中与本文有关的概念，以及系统的模型和参与其中的角色。
 
-### A. Cryptocurrency-backed Assets (CBA)
+### A. Cryptocurrency-backed Assets(CBA)
 
-**Definition.** We define *cryptocurrency-backed assets* (CBAs) as assets deployed on top of a blockchain *I* that are backed by a cryptocurrency on blockchain *B*. We refer assets in *I* as *i *, and cryptocurrency on *B* as *b*. We use *i(b)* to further said when an asset on *I* is backed by *b*. We describe a CBA through the following fields:
+**Definition.** We define *cryptocurrency-backed assets* (CBAs) as assets deployed on top of a blockchain *I* that are backed by a cryptocurrency on blockchain *B*. We denote assets in *I* as *i*, and cryptocurrency on *B* as *b*. We use *i(b)* to further denote when an asset on *I* is backed by *b*. We describe a CBA through the following fields:
 
 - *issuing blockchain*, the blockchain *I* on which the CBA *i(b)* is issued.
 
@@ -54,7 +57,7 @@ In this chapter, we first review and define some of the concepts in XClaim that 
 
 - *asset fungibility*, whether or not units of *i(b)* are inter-
 
-  Changeable.
+  changeable.
 
 ### B. System Model and Actors
 
@@ -64,7 +67,7 @@ XCLAIM operates between a backing blockchain *B* of cryptocurrency *b* and an is
 
 - CBA Sender. Owns i(b) and transfers ownership to another
 
-  User on I.
+  user on I.
 
 - CBA Receiver. Receives and is assigned ownership over
 
@@ -72,46 +75,46 @@ XCLAIM operates between a backing blockchain *B* of cryptocurrency *b* and an is
 
 - CBA Redeemer. Destroys i(b) on I to request the corre-
 
-  Sponding amount of b on B.
+  sponding amount of b on B.
 
-- CBA Backing Smart Constract(bSC). A public smart contract responsible for trust-free locking/releasing *b* as protocol design requires and liable for fulfilling redeem requests of i(b) for b on B, with support of chain relay to Honestly follow the instructions from redeem requests from I. *bSC* is registered on *I* so that the issuing contracts on *I* will know the transactions happen to bSC.
+- CBA Backing Smart Constract(bSC). A public smart contract responsible for trust-free locking/releasing *b* as protocol design requires and liable for fulfilling redeem requests of i(b) for b on B, with support of chain relay to honestly follow the instructions from redeem requests from I. *bSC* is registered on *I* so that the issuing contracts on *I* will know the transactions happen to bSC.
 
-- Issuing Smart Contract (iSC). A public smart contract responsible for managing the correct issuing and exchange of i(b) on I. The *iSC* is required to register on *bSC* so ​​that the backing contracts on *B* will Know the transactions happen to *iSC*, in this way, *iSC* assurance correct behaviour of the *bSC*, eg the release action in redeem protocol.
+- Issuing Smart Contract (iSC). A public smart contract responsible for managing the correct issuing and exchange of i(b) on I. The *iSC* is required to register on *bSC* so that the backing contracts on *B* will know the transactions happen to *iSC*, in this way, *iSC* ensures correct behaviour of the *bSC*, e.g. the release action in redeem protocol.
 
-  To perform these roles in XCLAIM, actors are identified on a blockchain using their public/private key pairs. As a result, the requester, redeemer must maintain key pairs for both blockchains B and I. The sender and receiver only need to maintain key pairs For the issuing blockchain *I*. *iSC* exists as a publicly verifiable smart contract on *I*, and *bSC* exists as a publicly verifiable smart contract on *B*.
+  To perform these roles in XCLAIM, actors are identified on a blockchain using their public/private key pairs. As a result, the requester, redeemer must maintain key pairs for both blockchains B and I. The sender and receiver only need to maintain key pairs for the issuing blockchain *I*. *iSC* exists as a publicly verifiable smart contract on *I*, and *bSC* exists as a publicly verifiable smart contract on *B*.
 
-### C. What is *chain relay*
+### C. 什么是 *chain relay*
 
-XClaim gives the definition of *chain relay* [7]:
+XClaim 给出了对 *chain relay* [7]的定义：
 
-> Chain relays: Cross-Chain State Verification. It is capable of interpreting the statte of the backing blockchain B and provide functionality comparable to an SPV or light client [10].
+> Chain relays: Cross-Chain State Verification. It is capable of interpreting the statte of the backing blockchain B and provide functionality comparable to an SPV or light client[10].
 
-Therefore, *chain relay* can be thought of as consisting of a block header containing the root of merkle tree. It provides two functions for iSC: * Proof of transaction existence* and *Consensus proof*.
+因此，*chain relay* 可以被认为是由包含root of merkle tree的区块头组成。它为 iSC 提供了两种功能： *交易存在证明* 以及 *共识证明*。
 
-- *** Proof of transaction existence ***: *chain relay* stores each block header of the blockchain and the root of merkle tree in the block header. In the case of providing the merkle tree path, this is sufficient to prove Whether a transaction exists in a certain block of this chain.
-- *** Consensus Proof ***: Take Bitcoin as an example. Because each node usually cannot see the whole network in real time, it often happens that a lone block is generated and discarded in reorganization. To avoid attacks/vulnerabilities caused by this situation, *chain relay* must verify that a given block header is part of a complete blockchain, for example, recognized by most nodes. For blockchains with a consensus Proof-of-Work, *chain relay* must: (i) know the mining difficulty adjustment strategy (ii) verify that the received block header is on the chain with the most cumulative workload proof. For blockchains with a consensus Proof-of-Stake, *chain relay* must: (i) know the phase of the protocol request/staking, eg epoch (ii) verify that the number of certifier signatures in the block header meets the block threshold requirements .
+- ***交易存在证明***： *chain relay* 存储着区块链的每一个区块头，以及区块头里的root of merkle tree. 在提供merkle tree路径的情况下，这已经足够可以证明一笔交易是否存在于这条链的某个区块中。
+- ***共识证明***： 以比特币为例，因为每个节点通常不能即时看到全网的情况，因此经常会发生产生孤块，又在重组中被丢弃的情况。为了避免这种情况带来的攻击/漏洞，*chain relay* 必须要验证给定的区块头是否为完整区块链的一部分，例如被大部分节点认可。对于共识为Proof-of-Work的区块链，*chain relay* 必须：(i) 知道挖矿难度调整策略  (ii) 验证收到的区块头是否在具有最多累计工作量证明的链上。 对于共识为Proof-of-Stake的区块链，*chain relay* 必须：(i) 知道协议要求/staking的阶段，例如epoch  (ii) 验证区块头中验证人签名数量是否满足区块的阈值要求。
 
 ![Chain Relay](./images/chain_relay.svg)
 
-[TODO: Image from the web]
+[TODO: 图片来自于网络]
 
-### D. Blockchain model and assumptions
+### D. 区块链模型和假设
 
-In the blockchain project that is currently online, there is almost no NFT as the original asset of the chain, and all NFTs are almost realized in smart contracts. Therefore, a new and reasonable assumption can be introduced for the chain $B$ where the native asset is located:
+在目前已经上线的区块链项目中，几乎没有NFT作为链的原生资产的，所有的NFT几乎都是在智能合约内实现的。因此，对原生资产所在的chain $B$, 可以引入全新且合理的假设：
 
-- *Backing blockchain* and *Issuing blockchain*: Both support Turing-complete smart contracts
+- *Backing blockchain* 和 *Issuing blockchain*:  都支持图灵完备的智能合约
 
-In this way, we can provide stronger technical constraints by placing separate smart contracts bSC and iSC on $B$ and $I$ to ensure cross-chain security.
+这样我们就可以通过在 $B$ 和 $I$ 上放置独立的智能合约 bSC 和 iSC 来提供更强的技术约束，保证跨链的安全性。
 
 ### E. System Goals
 
 1. Support General Tokens
    - Workable for NFT
-   - Workable for Fungible Tokens without liquidations on ourside exchanges.
+   - Workable for Fungible Tokens without liquidations on outside exchanges.
 2. Economic Feasible
-   - Backing contract does not require to provide a lot of collaterals for the safety of redeem protocol
+   - Backing contract does not require to provide a lot of collateral for the safety of redeem protocol
    - Feasible solutions for to support running low cost chain relay on backing blockchain.
-3. Securty Properties (Ignore, refer the section in XClaim paper):
+3. Securty Properties(Ignore, refer the section in XClaim paper):
    - Audiability
    - Consitency
    - Redeemability
@@ -124,73 +127,90 @@ In this way, we can provide stronger technical constraints by placing separate s
 
 ## IV. Backing Contract Solution
 
-**Backing Contract Solution** (two chain relay model) implements the lock-in and redemption release function of the endorsement asset *b* by introducing a smart contract that supports chain relay on the Backing Blockchain. With the support of chain relay, Backing Contract will be able to faithfully execute the redemption order on the release chain *I* without worrying about asset security issues, and does not require Backing Contract to pledge assets because Backing Contract is Audited and registered in *iSC*, thus avoiding the risk of intermediaries trust and single point of failure.
+**Backing Contract Solution**(two chain relay model)通过在Backing Blockchain上引入一个支持chain relay的智能合约，以实现背书资产*b*的托管锁定和赎回释放功能。因为有了chain relay的支持，所以Backing Contract将可以忠实的执行发行链*I*上的赎回指令，而不需担心资产的安全问题，也不用要求Backing Contract需要质押资产，因为Backing Contract 是可审计的，并且注册在*iSC*中，因此避免了中间人信任风险和单点故障问题。
 
 
 
-Compared to XClaim's original solution, we introduced a cross-chain solution with no $vault$ pledge, which guarantees redemption and security by introducing chain-relay on the backing blockchain. *chainRelay* can provide proof of transaction and proof of consensus for the blockchain. In XClaim's scheme, there is no additional requirement for chain $B$, resulting in security on chain $B$ only by chain $I$ Offer $vault$ on mortgage $i\_col$. ***bSC + iSC*** bidirectional mutual authentication and interoperability can be implemented in the transit bridge through the new hypothesis constraints introduced in chain $B$ in III-D. For example, in a redemption agreement, asset security on chain $B$ can be implemented non-interoperably, reducing the dependency on $vault$.
+相较于XClaim原始的方案，我们引入了完全无 $vault$ 质押的跨链方案，通过在backing blockchain上引入chain-relay来保证可赎回性和安全性。*chainRelay* 可以提供区块链的交易存在证明和共识证明，在XClaim的方案中，对chain $B$ 没有任何额外的要求，导致在 chain $B$ 上的安全只能由在 chain $I$ 上抵押 $i\_col$ 的 $vault$ 来提供。通过III-D中对 chain $B$ 引入的新的假设约束，可以在转接桥中实现***bSC + iSC***双向互相验证和互操作。例如，在赎回协议中， chain $B$ 上的资产安全可以非互操作性地实现，降低对 $vault$ 的依赖。
 
 ### A. Protocols
 
-This program provides five agreements: Register, Issue, Transfer, Swap and Redeem.
+本方案提供五个协议：Register, Issue, Transfer, Swap and Redeem.
+
+**Protocol: Register.** *bSC*需要在*iSC*中注册，*iSC*也需要在*bSC*中注册，这个相互注册过程需要公开可审计的，并通过注册完成之后的关闭外部(中心化的key的)注册权限的方式完成注册。Alice deploy an backing contract on B, and Dave deploy and issuing contract on I, and the backing contract and issuing contract require to register with each other.
+
+1. Deploy. First, Alice deploy the backing contract on B, and Dave deploy the issuing contract on I.
+2. Verify. Alice and Dave verify the counterpart's smart contracts.
+3. Register&Setup. Alice register Backing contract on I and associate with Issuing contract. Dave register Issuing contract on B and associate with backing contract.
+4. Finish. Backing and Issuing Contracts finish the permission-less register process. (Some permission closing TX may be required.)
+
+**Protocol: Issue.** Alice (*requester*) locks units of *b* with the *backing contract* on B to create *i(b)* on I:
+
+1. Lock. Alice generates a new pulic/private key pare on *I* and locks funds *b* with the backing contract on B in a publicly verifiable manner. i.e., by send *b* to the lock contract associated with backing contract. As part of locking these funds, Alice also specifies where the to-be-generated *i(b)* should be sent, i.e, Alice associates her public key on *I* with the transfer of *b* to the lock contract (linked to backing contract).
+2. Check Finalization. Alice (or her running client) check the the finalization vailid status of the lock transaction before she do the next step.
+3. Send Lock TX Proof. Alice send the lock transaction proof to *Issuing Contract* on *I* , the instruction in the proof and transaction also include the issue instructions.
+4. Verify & Issue. After the issuing contract confirms via the TX proof and verify the validation that Alice has correctly locked her funds and forwards Alice's public key on I to iSC. The iSC verifies the proof, then issues and send i(b) to Alice, such that $||i(b)|| = ||b||$
+
+**Protocol: Transfer.**Alice (*sender*) transfers *i(b)* to Dave (*receiver*) on I:
+
+1. *Transfer.* Alice notifies the iSC that she wishes to transfer her i(b) to Dave (public key) on I. The state of the iSC is updated and Dave becomes the new owner of i(b).
+2. *Witness.* The backing contract witnesses the change of ownership on I through iSC, and no longer allows Alice to withdraw the associated amount of locked b on B. The process for any further transfers from Dave to other users is analogous.
+
+**Protocol: Swap**.Alice (sender) atomically swaps i(b) against Dave’s (receiver) i on I:
+
+1. *Lock.* Alice locks i(b) with the iSC.
+
+2. *Swap.* If Dave locks the agreed upon units of i (or any other asset on I) with the iSC within delay ∆swap, the iSC updates the balance of Dave, making him the new owner of i(b), and assigns Alice ownership over i.
+
+3. *Revoke.* If Dave does not correctly lock i with the iSC within ∆swap, the iSC releases locked i(b) to Alice.
+
+4. *Witness.* If the swap is successful, the backing contract witnesses the change of ownership of i(b) and no longer allows Alice to redeem the associated amount.
+
+**Protocol: Redeem.**Dave (redeemer) burn i(b) with the iSC on I to receive b from the vault on B:
+
+1. Burn & Redeem. Dave creates a new public/private key pair on B. and locks *i(b)* with the *iSC* on I and requests the redemption of *i(b)*. There by, Dave also specifies his new public key on *B* as the target for the redeem.
+
+2. Check Finalization. Dave (or her running client) check the the finalization valid status of the lock transaction before she do the next step.
+
+3. Send Burn TX Proof. Dave send the burn transaction proof to *bSC* on *B* , the instruction in the proof and transaction also include the redeem instructions.
+
+4. Verify & Release.  After the backing contract confirms via the TX proof and verify the validation that Dave has correctly locked her funds and forwards Dave's public key on B to *bSC*. The *bSC* verifies the proof, then release funds *b* to Dave's specified public key on *B*, such that $||b|| = ||i(b)||$
 
 
-
-**Protocol: Register. ** *bSC* needs to be registered in *iSC*, *iSC* also needs to be registered in *bSC*, this mutual registration process needs to be publicly auditable and closed externally after registration is completed ( The registration of the centralized key) registration is completed.
-
-[WIP]
-
-**Protocol: Issue. **
-
-[WIP]
-
-**Protocol: Transfer. **
-
-[WIP]
-
-**Protocol: Swap. **
-
-[WIP]
-
-**Protocol: Redeem. **
-
-[WIP]
 
 ![Solution Protocols](./images/xclaim_new_protocol_overview.png)
 
-Fig High-level overview of the Register, Issue, Swap and Redeem Protocol.
+### B. Issue Contract
 
-### B. Issue Contract 
-
-Thanks to the Backing Contract and the elimination of the part that only needs to pledged assets, the new Issuing Contract has been greatly simplified compared to the original XClaim solution.
+由于有了Backing Contract，并消除了只需要质押资产的部分，因为相较于原先XClaim的方案，新的Issuing Contract得到了很大的简化。
 
 ![Issuing Contract](./images/issuing_contract.png)
 
 ### C. Backing Contract
 
-The Backing Contract is used to replace the Vault part of the original XClaim, and adds the smart contract and chain relay support. By introducing the chain relay in the Backing Blockchain, when the redemption occurs, the Backing Contract can listen to the destruction action on the Issuing Blockchain, and Perform transaction verification and confirm the corresponding endorsement asset release action.
+Backing Contract用于替换原先XClaim中Vault的部分，并增加了智能合约和chain relay支持，通过在Backing Blockchain中引入chain relay，当发生赎回时，Backing Contract能够监听到Issuing Blockchain上的销毁动作，并进行交易验证，确认之后进行相应的背书资产释放动作。
 
 ![Backing Contract](./images/backing_contract.png)
 
 
 
-#### D. *chain relay* How to trust
+#### D.  *chain relay* 如何去信任
 
-Here is an example of *Protocol Issue* in Section IV.A. When *requester* locks $b$ to $bSC$, a transaction is generated: $lock(backing_contract_address, lock_amount) -> T_l$ , then backing The chain relay's *witness* will submit the transaction $T_l$ to *chain relay*, after which *chain relay* will verify that $T_l$ is indeed present in the transaction for the given block (transaction proof), this block It also exists in the longest chain and has good finality (consensus proof), then it proves that the endorsement asset &&b has been safely locked. If the verification passes, the asset issuance operation in *iSC* is triggered atomically.
+这里以章节IV.A中的 *Protocol Issue* 为例，当 *requester* 把 $b$ 锁定在 $bSC$ 时，会产生一笔交易: $lock(backing_contract_address, lock_amount) - > T_l$ ，随后backing chain relay的 *witness* 会向 *chain relay* 提交这笔交易$T_l$ ，之后 *chain relay* 会检验 $T_l$ 确实是存在于给定区块的交易中(交易存在证明)，这个区块也存在于最长链中并有良好的终结性（共识证明），那么就证明背书资产&&b已经被安全地锁定了。如果验证通过，会原子地触发 *iSC* 中的资产发行操作。
 
 
 
 ## V. Darwinia Bridge Core - Chain Relay Topology Optimization
 
-To transfer tokens across two chains in a chain, the cost of maintaining *chain relay* in chain $I$ is very high, for example, every transaction on Ethereum requires gas. If you extend the cross-chain behavior between the two public chains to any $n$ public chain, then each strand needs to maintain $n-1$ iSC separately, which will require $C_n^2$ chain relay in total. contract. In order to reduce the maintenance cost of the system, consider implementing the core functions of the cross-chain on the parallel chain based on the substrate.
+在两条公链中跨链转移token，需要在chain $I$ 维护 *chain relay* 的成本是很高的，例如以太坊上每笔交易需要gas。如果把两条公链之间的跨链行为扩展到任意 $n$ 公链的话，那么每条链上都需要单独维护 $n-1$ 个 iSC，总共将需要$C_n^2$个chain relay合约。为了降低系统的维护成本，考虑在基于substrate的平行链上实现跨链的核心功能。
 
-### A. *Darwinia Bridge Core* Architecture
+### A. *Darwinia Bridge Core* 架构
 
-Then the architecture of the entire system is as follows:
+那么整个系统的架构如下：
 
 ![chain-relay-framework](https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8rjjzvj30kb0bfgmc.jpg)
 
-In the figure, **Bridge Core** is the core module that contains the cross-chain and the chain relay on the parallel chain; **vSC** is the distribution module of the corresponding chain of **Bridge Core**. Different from the previous cross-chain solution, in the architecture of the above figure, all the tokens of the chain need to first enter the **Bridge Core**, and then convert to the iSC corresponding to the destination public link in the **Bridge Core** Finally, the corresponding assets are issued on the corresponding public chain, and the entire cross-chain operation is completed.
+图中 **Bridge Core** 即为平行链上包含通证跨链和各chain relay的核心模块；**vSC** 为 **Bridge Core** 的对应链的资产的发行模块。和以前的跨链方案不同的是，在上图的架构中，所有链的token需要先跨入**Bridge Core**, 而后在 **Bridge Core** 内部转换到目的公链对应的iSC 中，最后再在对应公链上发行对应的资产，整个跨链操作即完成。
 
 ### B. Overview
 
@@ -198,27 +218,41 @@ In the figure, **Bridge Core** is the core module that contains the cross-chain 
 
 ## VI. Chain Relay Maintenance Cost and Improments
 
-Changing the Collateral Vault model in the Backing Blockchain to the chain relay solution In addition to the Smart Contract support of the Backing Blockchain, there is a disadvantage and a place to consider, which is to maintain the cost of the chain relay, especially for fuel costs like Ethereum. Blockchain network.
+与XClaim方案相比，最终的区别是在Backing Blockchain中引入了Chain Relay和智能合约，用于验证交易存在证明和共识证明。这个方案最大的一个挑战就是就是如何降低维护chain relay的成本，尤其是像以太坊这样的燃料费比较贵的区块链网络。
+
+为了验证交易，像Bitcoin和以太坊需要节点来验证一条链是有效的，其中牵涉到下载并并验证区块的有效性，可能会花费服务器数小时的时间和很多的带宽和存储，不用说链上的合约，即使是像普通的移动端这样仅有有限资源的客户端都无法支持。因此像Bitcoin和以太坊这样的大部分公链提供了轻客户端，也就是SPV(Simplified payment verification)客户端，可以只需要下载区块头就可以进行交易验证。但是即使如此，简单的SPV客户端仍需要下载很多的区块头数据，面对智能合约高昂的燃料费来说，实现起来仍然不切实际。
+
+因此，本章节将注重于对不同的Chain Relay实现进行评估和分析，以求找到链上成本最低的方案。
 
 ### A. Cost Estimation
 
+根据FlyClient[6]的描述，至2019年7月，一个以太坊的SPV客户端需要下载并存储4G的数据，如果采取类似的结构和设计，一个链上Chain Relay所需要下载并存储存储的数据也基本线性相关。
+
+另一个可以评估的方案是[BTCRelay]([http://btcrelay.org](http://btcrelay.org/))的成本。[WIP]
+
+### B. Improvements using FlyClient[6]
+
+FlyClient[6]介绍了一种新的交易验证的轻客户端方案，可以支持多种区块链网络，包括POW区块链和POS区块链。
+
+目前阶段，主要SPV客户端和BTCRelay方案的是，因为需要存储每一个区块头，导致其算法需要的存储和带宽要求是线性增长的。Fly Client通过组合 Merkle Moutain Range(MMR)[2]，最佳概率块抽样(Optimal probabilistic block sampling)，Fiat–Shamir heuristic等技术，可以实现算法性能达到对数级，也就是在每次执行校验期间只需要下载对数个区块头。
+
+详细设计可参考[FlyClient: Super-Light Clients for Cryptocurrencies](https://eprint.iacr.org/2019/226)
+
+### C. Improvements using Zero-knowledge Proofs
+
 [WIP]
 
-### B. Improments using Merkle Mountain Ranges
 
 
-
-[WIP, Merkle Mountain Range]
-
-### C. Improments using Zero-knowlege Proofs
-
-[WIP]
-
-
-
-## VI. Reference
+## VI. 参考
 
 1. https://github.com/sec-bit/zkPoD-lib
 2. https://github.com/mimblewimble/grin/blob/master/doc/mmr.md
 3. https://github.com/ipfs/specs/tree/master/merkledag
 4. https://hackernoon.com/ipfs-and-merkle-forest-a6b7f15f3537
+5. XClaim, https://eprint.iacr.org/2018/643.pdf
+6. FlyClient, https://eprint.iacr.org/2019/226
+7. https://zhuanlan.zhihu.com/p/72620891
+8. https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2016-May/012715.html
+9. [Fiat Shamir heuristic](https://en.wikipedia.org/wiki/Fiat–Shamir_heuristic)
+10. https://medium.com/blockchain-research-newsletter/blockchain-research-newsletter-3-nipopow-and-flyclient-ac202f7624a7
