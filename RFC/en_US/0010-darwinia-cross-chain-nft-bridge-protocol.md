@@ -144,9 +144,9 @@ When an UNFO is produced, it must satisfy:
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
-#### B.III. 基于UNFO的NFT映射和ID一致性
+#### B.III. UNFO-based NFT mapping and ID consistency
 
-Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安全即可，但是NFT对可识别性有更高的要求，因此需要再跨链时更好的维护NFT CBA和原生资产的一一映射，并保持ID的一致性，包括GID和External Locol ID。
+Fungible Token only needs to ensure the value of CBA and the original assets are symmetrical and safe when cross-chain transfering, but NFT has higher requirements for identifiability, so it is necessary to better maintain NFT CBA and original assets 1-1 mapping to ensure consistency, including GID and External Local ID.
 
 | UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
 | ---- | ------- | ----------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
