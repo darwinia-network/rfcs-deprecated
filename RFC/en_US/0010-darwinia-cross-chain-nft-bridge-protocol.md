@@ -144,9 +144,9 @@ When an UNFO is produced, it must satisfy:
 
 <img src="https://tva1.sinaimg.cn/large/006y8mN6ly1g7fe8skd28j30hj06z0sz.jpg" alt="0010-UNFO-transform" style="zoom:50%;" />
 
-#### B.III. 基于UNFO的NFT映射和ID一致性
+#### B.III. UNFO-based NFT mapping and ID consistency
 
-Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安全即可，但是NFT对可识别性有更高的要求，因此需要再跨链时更好的维护NFT CBA和原生资产的一一映射，并保持ID的一致性，包括GID和External Locol ID。
+Fungible Token only needs to ensure the value of CBA and the original assets are symmetrical and safe when cross-chain transfering, but NFT has higher requirements for identifiability, so it is necessary to better maintain NFT CBA and original assets 1-1 mapping to ensure consistency, including GID and External Local ID.
 
 | UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
 | ---- | ------- | ----------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
@@ -154,10 +154,10 @@ Fungible Token在跨链时只要保证CBA和原生资产价值对称、资产安
 | 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem          | True          |
 | 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
-  基于UNFO的映射表示例
-</center> 假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
+  Example: Mapping Based on UNFO
+</center> Suppose we use nft (Exterenal_Chain_ID, External_Contract_Address, External_Token_ID) to identify the NFT on an external public chain. In the absence of a cross-chain mapping table for NFT:
 
-> nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
+> nft(A, X, 1) represents the NFT identified as 1 on the A chain and in contract X.
 
 在没有NFT的跨链映射表的情况下，
 

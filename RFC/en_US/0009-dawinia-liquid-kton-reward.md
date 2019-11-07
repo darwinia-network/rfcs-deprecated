@@ -2,7 +2,7 @@
 rfc: 9
 title: 0009-dawinia-liquid-kton-reward
 status: Abandoned
-desc: 给流动KTON分发RING收益
+desc: How to distribute ring income to liquidation KTON holders
 ---
 
 - 功能描述: 给流动KTON分发RING收益
