@@ -151,7 +151,7 @@ Fungible Token only needs to ensure the value of CBA and the original assets are
 | UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
 | ---- | ------- | ----------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
 | 1    | GID0001 | Ethereum          | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
-| 2    | GID0001 | Tron              | A_ERC721                 | ?                 | script_backing_redeem          | True          |
+| 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem          | True          |
 | 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
   基于UNFO的映射表示例
