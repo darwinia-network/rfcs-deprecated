@@ -154,7 +154,7 @@ Fungible Token only needs to ensure the value of CBA and the original assets are
 | 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem          | True          |
 | 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
-  基于UNFO的映射表示例
+  Example: Mapping Based on UNFO
 </center> 假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
 
 > nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
