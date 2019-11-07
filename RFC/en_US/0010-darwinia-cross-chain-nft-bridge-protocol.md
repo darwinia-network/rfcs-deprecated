@@ -155,9 +155,9 @@ Fungible Token only needs to ensure the value of CBA and the original assets are
 | 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
   Example: Mapping Based on UNFO
-</center> 假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
+</center> Suppose we use nft (Exterenal_Chain_ID, External_Contract_Address, External_Token_ID) to identify the NFT on an external public chain. In the absence of a cross-chain mapping table for NFT:
 
-> nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
+> nft(A, X, 1) represents the NFT identified as 1 on the A chain and in contract X.
 
 在没有NFT的跨链映射表的情况下，
 
