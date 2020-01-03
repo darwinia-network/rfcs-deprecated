@@ -151,21 +151,21 @@ Fungible Token only needs to ensure the value of CBA and the original assets are
 | UNFO | GID     | External Chain ID | External Contact Address | External Token ID | Lock_Script                      | Active Status |
 | ---- | ------- | ----------------- | ------------------------ | ----------------- | -------------------------------- | ------------- |
 | 1    | GID0001 | Ethereum          | A_ERC721                 | 12                | script_issuing_burn_or_relay | False         |
-| 2    | GID0001 | Tron              | A_ERC721                 | ?                 | script_backing_redeem          | True          |
+| 2    | GID0001 | Tron              | B_TRC721                 | ?                 | script_backing_redeem          | True          |
 | 3    | GID0002 | EOS               | C_dGoods                 | 2.5.4             | script_issuing_burn_or_relay | False         |
 <center>
-  基于UNFO的映射表示例
-</center> 假如我们用nft(Exterenal_Chain_ID, External_Contract_Address, External_Token_ID)标识一个外部公链上的NFT。在没有NFT的跨链映射表的情况下：
+  Example: Mapping Based on UNFO
+</center> Suppose we use nft (Exterenal_Chain_ID, External_Contract_Address, External_Token_ID) to identify the NFT on an external public chain. In the absence of a cross-chain mapping table for NFT:
 
-> nft(A, X, 1) 表示在A链上、合约X中标识为1的NFT。
+> nft(A, X, 1) represents the NFT identified as 1 on the A chain and in contract X.
 
-在没有NFT的跨链映射表的情况下，
+In the absence of a cross-chain mapping table for NFT,
 
-> Alice在跨链桥M(A->B)中，将nft(A, X, 1) 变为 nft(B, Y, 2) ；又通过跨链桥N(B->C)，将nft(B, Y, 2) 变为 nft(C, Z, 3)。之后，当Alice想继续使用跨链桥M将C链上的nft 跨链去 A链的话，因为没有跨链映射表查询该NFT在A中的ID信息，跨链桥M会将 nft(C, Z, 3) 识别为新的NFT CBA，这样很可能在跨回A链时，将不再是nft(A, X, 1)，而是nft(A, X, 5). NFT就丢失了自己的可识别性和ID一致性，会给协议和赎回过程带来额外的复杂性和混乱。
+> In the cross-chain bridge M (A->B), Alice changes nft(A, X, 1) to nft(B, Y, 2); switch nft( B, Y, 2) to nft(C, Z, 3) through cross-bridge N (B->C). Later, when Alice wants to continue to use the cross-chain bridge M to link the nft chain on the C-chain to the A-chain, because there is no cross-chain mapping table to query the ID information of the NFT in A, the cross-chain bridge M will be nft(C, Z, 3) is recognized as a new NFT CBA, which is likely to be no longer nft(A, X, 1), but nft(A, X, 5) instead . The identifiability and ID consistency add additional complexity and confusion to the protocol and redemption process.
 
-为了尽可能减少丢失NFT可识别性对用户造成的潜在资产损失，如果NFT在Bridge Core连接的网络之内跨链，则用户可以获取到Bridge Core上某个NFT当前的基于UNFO的NFT映射表，协议将可以约束用户跨链回A链的NFT需要遵循ID一致性和可识别性。这样，至少在Darwinia Bridge Core系统内，NFT可保证可识别性不被破坏。
+In order to minimize the potential asset loss caused by the loss of NFT identifiability, if the NFT crosses the chain within the Bridge Core connected network, the user can obtain the current UNFO-based NFT mapping table of an NFT on the Bridge Core. The protocol will be able to constrain the NFT of the user's cross-chain back to the A chain to comply with ID consistency and identifiability. Thus, at least within the Darwinia Bridge Core system, the NFT ensures that identifiability is not compromised.
 
-为了保持良好的ID一致性，在NFT通过Bridge Core跨链流转的生命周期内，希望保持External Chain ID和 (External Contact Address, External Token ID) 的映射关系保持不变，此时可以通过基于UNFO的解析服务，至UNFO映射表里面查询相应的External Token ID，以保持一致性。在RFC-0013章节III.D中，我们还将详细介绍NFT解析模块。
+In order to maintain a good ID consistency, it is desirable to keep the mapping between the External Chain ID and the External Contact Address (External Token ID) unchanged during the lifecycle of the NTU through the Cross-chain of the Bridge Core. Analyze the service and query the corresponding External Token ID in the UNFO mapping table to maintain consistency. In RFC-0013 Section III.D, we will also detail the NFT parsing module.
 
 ### C. Preliminary Implementation Plan
 
