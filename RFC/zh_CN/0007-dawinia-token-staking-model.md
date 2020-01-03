@@ -33,7 +33,7 @@ RING的硬顶总量为100亿。
 
 # 收益分配
 达尔网络总收入包括出块奖励和达尔文网络交易手续费。达尔文网络交易手续费包括网络手续费，跨链服务质押费用，应用链链的接入费用，以及相关应用比如进化星球自主选择分配给达尔文网络的收入。
-
+![收益分配](./images/reward.jpeg)
 ```
 Staking = 系统收入 × Y
 Treasury = 系统收入 × (1 - Y)
@@ -49,12 +49,7 @@ Staking
 
 Staking按照简单和复杂程度，可以分为基础版和专业版。
 
-
-## 基础版Staking
-
-
-## 专业版Staking
-
+![Staking流程](./images/staking_flow.jpeg)
 
 # 氪石(KTON)
 
@@ -165,16 +160,14 @@ Polkadot的Parachain Slot拍卖竞价允许任何类型的抽象账户参与竞�
 
 ## 代码库
 
-[WIP] https://github.com/evolutionlandorg/darwinia-appchain
+https://github.com/darwinia-network/darwinia/tree/develop/srml/staking
 
 ## 主要特性和创新[WIP]
 
 - 支持Solo模式和波卡连接模式的无缝切换
 - 二阶Staking模型：锁定的氪石相当于二阶的锁定RING
 - 氪石是根据古灵阁氪石利息算法生成的，鼓励长期锁定和长期投入者
-- Staking权益和投票权的通证化，Staking后的锁定氪石即为投票权。
-- 应用层收入和达尔文收入分层设计，将进化星球应用层与达尔文跨链网络协议层解耦
-- 波卡连接模式，类似一种众筹DOT抵押参与Polkadot Slot竞价拍卖的模式，并且参与达尔文网络Staking分成
+- Staking权益和投票权的通证化，Staking后的锁定氪石即为投票权
 
 
 # 缺点
