@@ -103,7 +103,8 @@ In addition, because the RING is locked in the Gringotts certificate of deposit,
 
 - After verifying the correctness of the transaction, Darwinia's deposit slip migration module will perform the remaining migration steps on Darwinia, including a) unlocking the corresponding number of RINGs, b) staking these RINGs, and c) committing locks on these staking RINGs . (Different from the normal process, no KTON rewards will be issued here, because they have already been rewarded in Ethereum)
 
-  ![Gringotss Deposit Migration Protocol](./images/darwinia_deposit_migration_protocol.png)
+  
+![Gringotss Deposit Migration Protocol](./images/darwinia_deposit_migration_protocol.png)
 
 ### IV. Ordinary Issuance and Ordinary Redemption Agreements for Cross-chain Transfers
 
