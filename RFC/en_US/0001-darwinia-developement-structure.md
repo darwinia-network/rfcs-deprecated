@@ -4,7 +4,6 @@
 - Github Issue: None
 
 # 概要
-[summary]: #summary
 
 达尔文网络（DARWINIA）基于Substrate开发的跨链应用枢纽和资产互联网络。
 
@@ -14,12 +13,10 @@
 
 
 # 动机和目的
-[motivation]: #motivation
 
 达尔文网络需要一个很好的跨链技术架构来支撑进化星球的业务体系。
 
 # Guide-level explanation
-[guide-level-explanation]: #guide-level-explanation
 
 关于Polkdot的网络拓扑可以参考其白皮书，其网络拓扑的发展会有点像分形结构，即局部的网络拓扑和整体的网络拓扑会是同构且比较相似。下面的图片列出了达尔文网络可能在网络中的位置。
 
@@ -28,7 +25,6 @@
 
 
 # Reference-level explanation
-[reference-level-explanation]: #reference-level-explanation
 
 关于Substrate框架的详细介绍，可以参考下面的一些代码库和文档。
 
@@ -37,12 +33,10 @@
 - [https://docs.substrate.dev/](Substrate文档和上手资料)
 
 # 缺点
-[drawbacks]: #drawbacks
 
 比较依赖Substrate的开发设计和进度。
 
 # 理由
-[rationale-and-alternatives]: #rationale-and-alternatives
 
 - Substrate是Polkadot底层的框架，符合达尔文网络跨链的理念
 - 最新的技术框架，比较好的底层模块解耦和支持，可以定制SRML

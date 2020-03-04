@@ -2,7 +2,7 @@
 rfc: 9
 title: 0009-dawinia-liquid-kton-reward
 status: Abandoned
-desc: 给流动KTON分发RING收益
+desc: How to distribute ring income to liquidation KTON holders
 ---
 
 - 功能描述: 给流动KTON分发RING收益
@@ -11,7 +11,6 @@ desc: 给流动KTON分发RING收益
 - Github Issue: None
 
 # 概要
-[summary]: #summary
 
 在达尔文网络Solo模式设计中，需要给全部KTON进行RING收益的分发，这意味着收益分发前后KTON都是可以转账和流动的，即需要可以支持给流动KTON进行RING收益的分发。
 
@@ -53,22 +52,17 @@ to.Deposit = to.normal_deposit(Input) + to.Reward_Settlement(Input)
 
 在KTON没有发生转账的情况下，也有可能会发生Reward_Settlement:
 
-    - 有收益进账，需要进行分配
-        对于这种情况，如果每一次收益分配时，都对每个KTON持有者的收益余额进行计算，会消耗大量的计算资源，因此不切实际。改进的办法是，KTON持有者的收益都放入一个池子，在需要清算时再针对单个KTON持有者进行计算。
-        因此，收益进账后，只有收益池的总额发生了变化。
-    - KTON持有者Claim收益
-        但某一个KTON持有者希望Claim收益时，会根据收益池RING总量，该持有者的KTON数量，KTON总量，按比例计算出可以Claim的收益，并将该次收益提现记录进该账户已提现的总量。
-        
+    - 有收益进账，需要进行分配 对于这种情况，如果每一次收益分配时，都对每个KTON持有者的收益余额进行计算，会消耗大量的计算资源，因此不切实际。改进的办法是，KTON持有者的收益都放入一个池子，在需要清算时再针对单个KTON持有者进行计算。 因此，收益进账后，只有收益池的总额发生了变化。
+    - KTON持有者Claim收益 但某一个KTON持有者希望Claim收益时，会根据收益池RING总量，该持有者的KTON数量，KTON总量，按比例计算出可以Claim的收益，并将该次收益提现记录进该账户已提现的总量。
+
         该账户可提现数量 = 该账户可提现数量(已清算 + 未清算) - 该账户已提现数量
 
 
 # 动机和目的
-[motivation]: #motivation
 
 - 提供一个可以给流动性原生通证清算收益的技术方案
 
 # 参考和实现
-[reference-level-explanation]: #reference-level-explanation
 
 ## 代码库
 
@@ -83,20 +77,16 @@ https://github.com/darwinia-network/darwinia/tree/master/srml/kton
 
 
 # 缺点
-[drawbacks]: #drawbacks
 
 - 转账时需要多出一定的链上收益清算计算量
 - 如果KTON持有者的账户是合约账户，那么目前的RING收益只能该合约账户去领取，但是合约账户是否支持是个问题。
 - 本解决方案范围不包括在其他公链(例如以太坊或者波场)上的KTON收益分配，对于其他网络上的KTON，应该会统一在达尔文中继链上创建一个账户，用于领取收益，具体的收益则在对应公链上发生，例如目前进化星球基于状态通道的收益分配方式并不会发生变化，好处是相应的KTON也可以得到收益。
 
 # 理由
-[rationale-and-alternatives]: #rationale-and-alternatives
 
-具体Staking的设计参考RFC-0007。具体的技术方案则参考了P3D的实现。P3D没有支持转账方法，有其业务层面的考虑，也有可能因为转账操作的燃料费消耗考虑。
-但对于KTON这样的原生通证，可以再SRML层面实现。
+具体Staking的设计参考RFC-0007。具体的技术方案则参考了P3D的实现。P3D没有支持转账方法，有其业务层面的考虑，也有可能因为转账操作的燃料费消耗考虑。 但对于KTON这样的原生通证，可以再SRML层面实现。
 
 # 现有技术
-[prior-art]: #prior-art
 
 
 # 以太坊上一些常见的收益分配方案可以作为参考
@@ -117,11 +107,9 @@ P3D严格意义上不同于ERC20通证，因为不支持通证转账功能，只
 
 具体实现是，维护以下账本，以权益通证P3D和分红币ETH为例：
 
-Total_ETH_Dividends_Balance,  所有历史分红的总和，只会增加不会减少。每次分红的时候会增加。
-My_ETH_Dividends_Balance_Claimed[address], 某P3D持有者放在系统保险箱里的ETH分红余额，刚开始为0，但是每次持有者P3D余额变化（购入，卖出）的时候ETH分红余额会更新并增加，持有者可以从中领取分红到自己的钱包，并相应减少。
+Total_ETH_Dividends_Balance,  所有历史分红的总和，只会增加不会减少。每次分红的时候会增加。 My_ETH_Dividends_Balance_Claimed[address], 某P3D持有者放在系统保险箱里的ETH分红余额，刚开始为0，但是每次持有者P3D余额变化（购入，卖出）的时候ETH分红余额会更新并增加，持有者可以从中领取分红到自己的钱包，并相应减少。
 
-Last_Claim_Total_ETH_Dividends_Balance[address], 某P3D持有者上一次Claim时，Total_ETH_Dividends_Balance的值，每次持有者余额变化（购入，卖出）的时候会更新。
-每次持有者余额变化（购入，卖出）的时候，操作之前的P3D余额为balance_before, P3D总额为balance_total_before，操作之后的P3D余额为balance_after, P3D总额为balance_total_after，持有者的地址为address。则首先会进行第2、3账本的更新。
+Last_Claim_Total_ETH_Dividends_Balance[address], 某P3D持有者上一次Claim时，Total_ETH_Dividends_Balance的值，每次持有者余额变化（购入，卖出）的时候会更新。 每次持有者余额变化（购入，卖出）的时候，操作之前的P3D余额为balance_before, P3D总额为balance_total_before，操作之后的P3D余额为balance_after, P3D总额为balance_total_after，持有者的地址为address。则首先会进行第2、3账本的更新。
 ```
 My_ETH_Dividends_Balance_Claimed[address] += {Total_ETH_Dividends_Balance - Last_Claim_Total_ETH_Dividends_Balance[address]} * [balance_before/balance_total_before]
 Last_Claim_Total_ETH_Dividends_Balance[address] = Total_ETH_Dividends_Balance
@@ -135,13 +123,11 @@ ERC20中持有者余额变化频繁，可以通过转账，发行，销毁等方
 https://etherscan.io/address/0xb3775fb83f7d12a36e0475abdd1fca35c091efbe#code
 
 # 问题
-[unresolved-questions]: #unresolved-questions
 
 [WIP]
 
 
 # 未来的可能性
-[future-possibilities]: #future-possibilities
 
 - 做成一个通用的SRML
 
