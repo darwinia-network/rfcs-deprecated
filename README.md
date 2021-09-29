@@ -21,7 +21,7 @@ The recommended language is English, and make sure that questions and informatio
 
 ## Propose New RFCs
 
-First review [RFC-0001](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0001-darwinia-developement-structure.md), this could also be seen as a RFC template.Then clone the repository and add your RFC to it. Then submit a Pull Request to Darwinia's [RFCs repository](https://github.com/darwinia-network/rfcs).
+First review [RFC-0007](https://github.com/darwinia-network/rfcs/blob/master/RFC/zh_CN/0007-dawinia-token-staking-model.md), this could also be seen as a RFC template.Then clone the repository and add your RFC to it. Then submit a Pull Request to Darwinia's [RFCs repository](https://github.com/darwinia-network/rfcs).
 
 The RFC source files are required to be in markdown format. [Typora](https://typora.io/) is a editor recommended for editing markdown files, it also have a good support for inline and Latex Formula. To view the Formulas in web browser, there is a chome [Mathjax Plugin](https://chrome.google.com/webstore/detail/mathjax-plugin-for-github/ioemnmodlmafdkllaclgeombjnmnbima) to help correctly render Latex Formulas in markdown documents in Github.
 

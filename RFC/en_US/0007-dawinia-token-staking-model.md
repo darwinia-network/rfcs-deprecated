@@ -1,4 +1,4 @@
-- 功能描述: 达尔文通证和Staking模型(Darwinia AppChain)
+- 功能描述: 达尔文通证和Staking模型
 - 开始时间: 2019-05-23
 - RFC PR: None
 - Github Issue: None
