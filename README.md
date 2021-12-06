@@ -1,7 +1,7 @@
 # Darwinia Introduction
 Darwinia Network provides developers the scalability, cross-chain interoperability, and NFT identifiability, with seamless integrations to Polkadot, bridges to all major blockchains, and on-chain RNG services.
 
-More details can be obtained through [Darwinia Genepaper](https://github.com/darwinia-network/rfcs/blob/master/paper/Darwinia_Genepaper_EN.pdf).
+More details can be obtained through [Darwinia Genepaper](paper/Darwinia_Genepaper_EN.pdf).
 
 # RFCs
 
